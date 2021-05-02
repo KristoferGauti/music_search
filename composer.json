@@ -21,6 +21,7 @@
         "drupal/core-project-message": "^9.1",
         "drupal/core-recommended": "^9.1",
         "drupal/devel": "^4.1",
+        "drupal/duration_field": "^2.0",
         "drupal/module_filter": "^3.2",
         "drush/drush": "^10.4"
     },
