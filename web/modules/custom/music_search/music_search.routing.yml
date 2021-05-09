@@ -1,0 +1,15 @@
+music_search.search:
+  path: "/search_results"
+  defaults:
+    _controller: Drupal\music_search\Controller\SearchController::search_results
+    _title: "Search results"
+  requirements:
+    _permission: "access content"
+
+music_search.search_form:
+  path: "/music_search"
+  defaults:
+    _form: Drupal\music_search\Form\MusicSearchForm
+    _title: "Search for a song"
+  requirements:
+    _permission: "administer site configuration"

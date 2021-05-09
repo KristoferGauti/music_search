@@ -1,0 +1,4 @@
+services:
+  music.search:
+    class: Drupal\music_search\
+    arguments: ["@config.factory"]

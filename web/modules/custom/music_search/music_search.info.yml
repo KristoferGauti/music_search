@@ -1,0 +1,5 @@
+name: Music Search
+description: Music search that searches for a song on Spotify or Discogs using API calls
+type: module
+core_version_requirement: ^9
+package: custom
