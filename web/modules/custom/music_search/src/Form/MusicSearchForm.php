@@ -4,8 +4,16 @@ namespace Drupal\music_search\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\music_search\SpotifySearchService;
 
 class MusicSearchForm extends FormBase {
+
+//  protected $spotify_search_service;
+
+
+//  public function __construct() {
+//    $this->spotify_search_service = \Drupal::service("spotify_search.search");
+//  }
 
   /**
    * {@inheritDoc}
@@ -45,8 +53,13 @@ class MusicSearchForm extends FormBase {
   /**
    * {@inheritDoc}
    */
+//  public function submitForm(array &$form, FormStateInterface $form_state) {
+//    $values = $form_state->getValue(array('nameofarray', 'value'));
+//    $this->spotify_search_service->_spotify_api_get_query("");
+//  }
+
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    $form_state->setRedirectUrl(Url::fromUri('internal:/search_results'));
+    // TODO: Implement submitForm() method.
   }
 
 }

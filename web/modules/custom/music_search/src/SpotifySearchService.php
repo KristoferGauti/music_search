@@ -1,6 +1,7 @@
 <?php
 
-namespace Drupal\music_search\modules\spotify_search;
+namespace Drupal\music_search;
+
 
 use http\Message\Body;
 
