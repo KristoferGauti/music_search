@@ -3,17 +3,29 @@ namespace Drupal\music_search\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Url;
 use Drupal\music_search\SpotifySearchService;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Class MusicSearchForm
+ *
+ * @package Drupal\music_search\Form
+ */
 class MusicSearchForm extends FormBase {
 
-//  protected $spotify_search_service;
+  /**
+   * @var \Drupal\music_search\SpotifySearchService
+   */
+  protected $spotify_search_service;
 
-
-//  public function __construct() {
-//    $this->spotify_search_service = \Drupal::service("spotify_search.search");
-//  }
+  /**
+   * MusicSearchForm constructor.
+   *
+   * @param \Drupal\music_search\SpotifySearchService $spotify_search_service
+   */
+  public function __construct(SpotifySearchService $spotify_search_service) {
+    $this->spotify_search_service = $spotify_search_service;
+  }
 
   /**
    * {@inheritDoc}
@@ -53,14 +65,21 @@ class MusicSearchForm extends FormBase {
   /**
    * {@inheritDoc}
    */
-//  public function submitForm(array &$form, FormStateInterface $form_state) {
-//    $values = $form_state->getValue(array('nameofarray', 'value'));
-//    $this->spotify_search_service->_spotify_api_get_query("");
-//  }
+  public static function create(ContainerInterface $container) {
+    return new static (
+      $container->get("music_search.search") //villa hann veit ekki hvar search service-ið er geymdur
+    );
+  }
 
+  /**
+   * {@inheritDoc}
+   */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $artist_name_input = $form_state->getUserInput()["Artist"];
-    $a = 10;
+    $song_name_input = $form_state->getUserInput()["Album"];
+    $query_string = "https://api.spotify.com/v1/search?q=artist:" . $artist_name_input . "%20album:" . $song_name_input . "&type=album";
+    $this->spotify_search_service->_spotify_api_get_query($query_string);
   }
+
 
 }

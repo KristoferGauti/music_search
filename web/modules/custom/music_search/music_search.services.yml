@@ -1,4 +1,4 @@
 services:
-  spotify_search.search:
+  music_search.search:
     class: Drupal\music_search\SpotifySearchService
 
