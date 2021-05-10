@@ -1,0 +1,3 @@
+services:
+  spotify.search:
+    class: Drupal\music_search\SpotifySearchService
