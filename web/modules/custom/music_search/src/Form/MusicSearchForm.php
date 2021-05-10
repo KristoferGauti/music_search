@@ -59,7 +59,8 @@ class MusicSearchForm extends FormBase {
 //  }
 
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // TODO: Implement submitForm() method.
+    $artist_name_input = $form_state->getUserInput()["Artist"];
+    $a = 10;
   }
 
 }
