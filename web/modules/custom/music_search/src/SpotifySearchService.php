@@ -26,7 +26,7 @@ class SpotifySearchService {
       ),
     );
 
-    $client =  \Drupal::httpClient();
+    $client = \Drupal::httpClient();
     $response = $client->get($uri, $options);
     return $response->getBody();
   }

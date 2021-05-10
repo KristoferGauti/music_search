@@ -67,7 +67,7 @@ class MusicSearchForm extends FormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static (
-      $container->get("music_search.search") //villa hann veit ekki hvar search service-ið er geymdur
+      $container->get("music_search.search")
     );
   }
 
@@ -78,7 +78,8 @@ class MusicSearchForm extends FormBase {
     $artist_name_input = $form_state->getUserInput()["Artist"];
     $song_name_input = $form_state->getUserInput()["Album"];
     $query_string = "https://api.spotify.com/v1/search?q=artist:" . $artist_name_input . "%20album:" . $song_name_input . "&type=album";
-    $this->spotify_search_service->_spotify_api_get_query($query_string);
+    $response = $this->spotify_search_service->_spotify_api_get_query($query_string);
+    \Drupal::messenger()->addMessage(strval($response));
   }
 
 
