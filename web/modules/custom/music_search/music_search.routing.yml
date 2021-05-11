@@ -10,6 +10,6 @@ music_search.search_form:
   path: "/music_search"
   defaults:
     _form: Drupal\music_search\Form\MusicSearchForm
-    _title: "Search for a song"
+    _title: "Search in spotify and Discogs"
   requirements:
     _permission: "administer site configuration"

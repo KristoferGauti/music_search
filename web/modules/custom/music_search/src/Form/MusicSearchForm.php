@@ -16,20 +16,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class MusicSearchForm extends ConfigFormBase {
 
-//  /**
-//   * @var \Drupal\music_search\SpotifySearchService
-//   */
-//  protected $spotify_search_service;
-//
-//  /**
-//   * MusicSearchForm constructor.
-//   *
-//   * @param \Drupal\music_search\SpotifySearchService $spotify_search_service
-//   */
-//  public function __construct(SpotifySearchService $spotify_search_service) {
-//    $this->spotify_search_service = $spotify_search_service;
-//  }
-
   /**
    * {@inheritDoc}
    */
@@ -48,16 +34,19 @@ class MusicSearchForm extends ConfigFormBase {
    * {@inheritDoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $form["Album"] = [
+    $form["search_field"] = [
       "#type" => "textfield",
-      "#title" => $this->t("Album"),
-      "#description" => $this->t("Please provide the album name that you want to search for!"),
+      "#title" => $this->t("Search"),
+      "#description" => $this->t("Please provide an artist name, album name or song name to search"),
     ];
-    $form["Artist"] = [
-      "#type" => "textfield",
-      "#title" => $this->t("Artist"),
-      "#description" => $this->t("Please provide the artist name that you want to search for!"),
-    ];
+    $form['search_type'] = array(
+      '#type' => 'radios',
+      '#title' => t('Type'),
+      '#options' => [
+        t('Artist'),
+        t('Album'),
+        t('Track'),
+      ]);
     $form["Search"] = [
       "#type" => "submit",
       "#value" => "Search"
@@ -69,9 +58,21 @@ class MusicSearchForm extends ConfigFormBase {
    * {@inheritDoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $radio_index = $form_state->getValue("search_type");
+    $radio_value = "";
+    switch ($radio_index) {
+      case 0:
+        $radio_value = "artist";
+        break;
+      case 1:
+        $radio_value = "album";
+        break;
+      case 2:
+        $radio_value = "track";
+    }
     $this->config("music_search.search")
-      ->set("spotify_album", $form_state->getValue("Album"))
-      ->set("spotify_artist", $form_state->getValue("Artist"))
+      ->set("spotify_search", $form_state->getValue("search_field"))
+      ->set("rad_val", $radio_value)
       ->save();
     $form_state->setRedirectUrl(Url::fromUri('internal:/search_results'));
     parent::submitForm($form, $form_state);
@@ -86,45 +87,3 @@ class MusicSearchForm extends ConfigFormBase {
   }
 
 }
-
-
-
-//  /**
-//   * {@inheritDoc}
-//   */
-//  public function submitForm(array &$form, FormStateInterface $form_state) {
-//    $artist_name_input = $form_state->getUserInput()["Artist"];
-//    $song_name_input = $form_state->getUserInput()["Album"];
-//    $query_string = "https://api.spotify.com/v1/search?q=artist:" . $artist_name_input . "%20album:" . $song_name_input . "&type=album";
-//    $response = $this->spotify_search_service->_spotify_api_get_query($query_string);
-//
-//    //$this->displayAlbums(render($response));
-//    $form_state->setRedirectUrl(Url::fromUri('internal:/search_results'));
-//
-//    \Drupal::messenger()->addMessage(strval($this->displayAlbums($response)));
-//    //render($response);
-//
-//
-//
-//  }
-
-
-//  public function displayAlbums($response) {
-//    $albums = json_decode($response)->{'albums'}->{'items'};
-//    $process_item = function($item) {
-//      return [
-//        "#theme" => 'item_list',
-//        '#items' => [
-//          'name' => $item->{'name'},
-//          'image' => $item->{'images'}[0]->{'url'},
-//          'spotify_id' => $item->{'id'}
-//        ]
-//      ];
-//    };
-//
-//    return [
-//      '#theme' => 'item_list',
-//      '#items' => array_map($process_item, $albums),
-//    ];
-//  }
-//}

@@ -19,9 +19,9 @@ class SpotifySearchService {
 
   public function get_data() {
     $config = $this->configFactory->get("music_search.search");
-    $artist_name_input = $config->get("spotify_artist");
-    $album_name_input = $config->get("spotify_album");
-    $query_string = "https://api.spotify.com/v1/search?q=artist:" . $artist_name_input . "%20album:" . $album_name_input . "&type=album";
+    $user_input = $config->get("spotify_search");
+    $radio_button_value = $config->get("rad_val");
+    $query_string = "https://api.spotify.com/v1/search?q=" . $user_input .  "&type=" . $radio_button_value;
     return $this->_spotify_api_get_query($query_string);
   }
 
