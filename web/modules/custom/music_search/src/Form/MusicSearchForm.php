@@ -3,6 +3,7 @@ namespace Drupal\music_search\Form;
 
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\music_search\SpotifySearchService;
 use http\Env\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -81,10 +82,10 @@ class MusicSearchForm extends FormBase {
     $query_string = "https://api.spotify.com/v1/search?q=artist:" . $artist_name_input . "%20album:" . $song_name_input . "&type=album";
     $response = $this->spotify_search_service->_spotify_api_get_query($query_string);
 
-    $this->displayAlbums(render($response));
+    //$this->displayAlbums(render($response));
     $form_state->setRedirectUrl(Url::fromUri('internal:/search_results'));
 
-    //\Drupal::messenger()->addMessage(strval($this->displayAlbums(render($response))));
+    \Drupal::messenger()->addMessage(strval($this->displayAlbums($response)));
     //render($response);
 
 
