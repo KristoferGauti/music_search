@@ -1,4 +1,4 @@
 services:
   music_search.search:
     class: Drupal\music_search\SpotifySearchService
-
+    arguments: ["@config.factory"]

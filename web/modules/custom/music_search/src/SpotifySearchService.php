@@ -3,9 +3,29 @@
 namespace Drupal\music_search;
 
 
+use Drupal\Core\Config\ConfigFactoryInterface;
 use http\Message\Body;
 
 class SpotifySearchService {
+
+  /**
+   * @var ConfigFactoryInterface
+   */
+  protected $configFactory;
+
+  public function __construct(ConfigFactoryInterface $configFactory) {
+    $this->configFactory = $configFactory;
+  }
+
+  public function get_data() {
+    $config = $this->configFactory->get("music_search.search");
+    $artist_name_input = $config->get("spotify_artist");
+    $album_name_input = $config->get("spotify_album");
+    $query_string = "https://api.spotify.com/v1/search?q=artist:" . $artist_name_input . "%20album:" . $album_name_input . "&type=album";
+    return $this->_spotify_api_get_query($query_string);
+  }
+
+
   /**
    * Sends a GET query to Spotify for specific URL
    *
