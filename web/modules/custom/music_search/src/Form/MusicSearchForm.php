@@ -4,6 +4,7 @@ namespace Drupal\music_search\Form;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\music_search\SpotifySearchService;
+use http\Env\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -79,8 +80,36 @@ class MusicSearchForm extends FormBase {
     $song_name_input = $form_state->getUserInput()["Album"];
     $query_string = "https://api.spotify.com/v1/search?q=artist:" . $artist_name_input . "%20album:" . $song_name_input . "&type=album";
     $response = $this->spotify_search_service->_spotify_api_get_query($query_string);
-    \Drupal::messenger()->addMessage(strval($response));
+
+    $this->displayAlbums(render($response));
+    $form_state->setRedirectUrl(Url::fromUri('internal:/search_results'));
+
+    //\Drupal::messenger()->addMessage(strval($this->displayAlbums(render($response))));
+    //render($response);
+
+
+
   }
 
 
+
+
+  public function displayAlbums($response) {
+    $albums = json_decode($response)->{'albums'}->{'items'};
+    $process_item = function($item) {
+      return [
+        "#theme" => 'item_list',
+        '#items' => [
+          'name' => $item->{'name'},
+          'image' => $item->{'images'}[0]->{'url'},
+          'spotify_id' => $item->{'id'}
+        ]
+      ];
+    };
+
+    return [
+      '#theme' => 'item_list',
+      '#items' => array_map($process_item, $albums),
+    ];
+  }
 }
