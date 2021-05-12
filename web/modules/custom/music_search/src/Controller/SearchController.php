@@ -34,14 +34,20 @@ class SearchController extends ControllerBase {
       $container->get("music_search.search")
     );
   }
-
-  /**
-   * gets the data from Spotify API in a JSON format
-   * @return array
-   */
   public function search_results() {
-    return [
-      "#markup" => $this->spotify_service->get_data()
-    ];
+    $json_obj = json_decode($this->spotify_service->get_data());
+    $results = array();
+    foreach($json_obj as $property) {
+      foreach($property->items as $item) {
+        array_push($results, $item);
+        $name = $item->name;
+
+        $breakpoint = 0;
+      }
+    }
+    return $results;
+//    return [
+//      "#markup" => $this->$results
+//    ];
   }
 }
