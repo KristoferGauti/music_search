@@ -22,4 +22,13 @@ music_search.search_form:
   requirements:
     _permission: "administer site configuration"
 
+music_search.search_results_form:
+  path: /search_results_form
+  defaults:
+    _form: Drupal\music_search\Form\SearchResultsForm
+    _title: "Choose the right data"
+  requirements:
+    _permission: "access content"
+
+
 

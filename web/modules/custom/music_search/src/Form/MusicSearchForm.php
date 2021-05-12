@@ -75,7 +75,7 @@ class MusicSearchForm extends ConfigFormBase {
       ->set("spotify_search", $form_state->getValue("search_field"))
       ->set("rad_val", $radio_value)
       ->save();
-    $form_state->setRedirectUrl(Url::fromUri('internal:/search_results'));
+    $form_state->setRedirectUrl(Url::fromUri('internal:/search_results_form'));
     parent::submitForm($form, $form_state);
   }
 
