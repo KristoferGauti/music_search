@@ -6,6 +6,14 @@ music_search.search:
   requirements:
     _permission: "access content"
 
+music_search.autocomplete:
+  path: "/autocomplete/artists"
+  defaults:
+    _controller: \Drupal\music_search\Controller\AutocompleteController::handleAutocomplete
+    _format: json
+  requirements:
+    _permission: "access content"
+
 music_search.search_form:
   path: "/music_search"
   defaults:
@@ -13,3 +21,5 @@ music_search.search_form:
     _title: "Search in spotify and Discogs"
   requirements:
     _permission: "administer site configuration"
+
+

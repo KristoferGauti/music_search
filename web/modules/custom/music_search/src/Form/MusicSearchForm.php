@@ -38,6 +38,7 @@ class MusicSearchForm extends ConfigFormBase {
       "#type" => "textfield",
       "#title" => $this->t("Search"),
       "#description" => $this->t("Please provide an artist name, album name or song name to search"),
+      "#autocomplete_route_name" => "music_search.autocomplete"
     ];
     $form['search_type'] = array(
       '#type' => 'radios',
