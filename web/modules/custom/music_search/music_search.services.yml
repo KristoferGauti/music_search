@@ -1,4 +1,13 @@
 services:
+#  discogs_search.service:
+#    class: Drupal\music_search\DiscogsSearchService
+#    arguments: ["@config.factory"]
+
   music_search.search:
     class: Drupal\music_search\SpotifySearchService
+    arguments: ["@config.factory"] #["@config.factory", "discogs_search.service"]
+
+  discogs_search.search:
+    class: Drupal\music_search\DiscogsSearchService
     arguments: ["@config.factory"]
+

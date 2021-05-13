@@ -5,7 +5,7 @@ namespace Drupal\music_search;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 
-class SpotifySearchService {
+class DiscogsSearchService {
 
   /**
    * @var ConfigFactoryInterface
@@ -16,16 +16,12 @@ class SpotifySearchService {
     $this->configFactory = $configFactory;
   }
 
-  public function get_radio_button_value() {
-    return $this->configFactory->get("music_search.search")->get("rad_val");
-  }
-
   public function get_data() {
     $config = $this->configFactory->get("music_search.search");
     $user_input = $config->get("spotify_search");
     $radio_button_value = $config->get("rad_val");
-    $query_string = "https://api.spotify.com/v1/search?q=" . $user_input .  "&type=" . $radio_button_value;
-    return $this->_spotify_api_get_query($query_string);
+    $query_string = "https://api.discogs.com/database/search?q={query}&{?type,title,release_title,credit,artist,anv,label,genre,style,country,year,format,catno,barcode,track,submitter,contributor}"
+    return $this->_discogs_api_get_query($query_string);
   }
 
 
@@ -37,8 +33,8 @@ class SpotifySearchService {
    * @return object
    *   Returns a stdClass with the search results or an error message
    */
-  function _spotify_api_get_query($uri) {
-    $token = $this->_spotify_api_get_auth_token();
+  function _discogs_api_get_query($uri) {
+    $token = $this->_discogs_api_get_auth_token();
     $token = json_decode($token);
     $options = array(
       'method' => 'GET',
@@ -57,11 +53,11 @@ class SpotifySearchService {
   /**
    * Gets Auth token from the Spotify API
    */
-  private function _spotify_api_get_auth_token() {
-    $SPOTIFY_API_CLIENT_ID = "529fd7ae993c488383c2700160208bbf";
-    $SPOTIFY_API_CLIENT_SECRET = "7a1c8b560e5b426b978963b897a1b6a7";
-    $connection_string = "https://accounts.spotify.com/api/token";
-    $key = base64_encode($SPOTIFY_API_CLIENT_ID . ':' . $SPOTIFY_API_CLIENT_SECRET);
+  private function _discogs_api_get_auth_token() {
+    $DISCOGS_CONSUMER_KEY = "xfGhpnxtocXhdbPTeFeE";
+    $DISCOGS_CONSUMER_SECRET = "iOLmwrmzgpBQeKjycHakmlIJFGaGOBiQ";
+    $connection_string = "https://api.discogs.com/oauth/access_token";
+    $key = base64_encode($DISCOGS_CONSUMER_KEY . ':' . $DISCOGS_CONSUMER_SECRET);
     $ch = curl_init();
 
     curl_setopt($ch, CURLOPT_URL, $connection_string);
@@ -80,3 +76,5 @@ class SpotifySearchService {
     return $result;
   }
 }
+
+

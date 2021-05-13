@@ -8,7 +8,6 @@ use Drupal\Core\Url;
 use Drupal\music_search\SpotifySearchService;
 use http\Env\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use function Drupal\Tests\Core\Render\callback;
 
 /**
  * Class MusicSearchForm
@@ -59,7 +58,7 @@ class SearchResultsForm extends ConfigFormBase {
     $data = json_decode($this->spotify_service->get_data());
     $options = [];
     $radio_value = $this->config("music_search.search")->get("rad_val");
-    $images = [];
+
     foreach($data as $stuff ) {
       foreach($stuff->items as $item) {
         //edge case for tracks whereas tracks does not have $item->images property, fix this with an if statement
@@ -74,45 +73,12 @@ class SearchResultsForm extends ConfigFormBase {
 
         if($img_url_one != null and $img_url_two) {
           $img_url = $img_url_two;
-//          $name = '<p> Name: '.$item->name.'</p>';
-//          $spotify_id = '<p> Spotify ID: ' . $item->id . '</p>';
-//          $str_image = '<img src=' . $img_url . ' width = "400" >';
+          $name = '<p> Name: '.$item->name.'</p>';
+          $spotify_id = '<p> Spotify ID: ' . $item->id . '</p>';
+          $str_image = '<img src=' . $img_url . ' width = "400" >';
 
-
-          $name = array(
-            '#type' => 'html_tag',
-            '#tag' => 'h3',
-            '#value' => $item->name,
-          );
-
-          $img = array(
-            '#type' => 'html_tag',
-            '#tag' => 'img',
-            '#attributes' => array(
-              'width' => 400,
-              'src' => $img_url,
-            ),
-            $spotify_id = array(
-              '#type' => 'html_tag',
-              '#tag' => 'p',
-              '#value' => $item->id,
-            )
-          );
-
-          $itemdiv = array(
-            '#type' => 'html_tag',
-            '#tag' => 'div',
-            '#values' => $img,
-            '#children' => render($img)
-//              array(
-//              'child' => $img,
-//              'child' => $name,
-//              'child' => $spotify_id,
-//            )
-          );
-          //$html_string = "<div>". $name . $spotify_id . $str_image . "</div>";
-//          array_push($options, $html_string);
-//          array_push($images, $str_image);//here for testing render arrays
+          $html_string = "<div>". $name . $spotify_id . $str_image . "</div>";
+          array_push($options, $html_string);
         }
         else {
           $no_thumbnail_html_string = "<div><p>" . $item->name . "</p><p>No thumbnail available</p></div>";
@@ -122,14 +88,10 @@ class SearchResultsForm extends ConfigFormBase {
     }
 
 
-
-
-
     $form['name'] = array(
-      '#type' => 'markup',
-      '#markup' => $itemdiv,
+      '#type' => 'checkboxes',
+      '#options' => $options,
     );
-
     $form["Continue"] = [
       "#type" => "submit",
       "#value" => "Continue"
