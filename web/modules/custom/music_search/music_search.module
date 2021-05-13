@@ -9,7 +9,7 @@ function music_search_help($route_name, RouteMatchInterface $route_match) {
     case "help.page.music_search":
       $output = "";
       $output .= "<h3>" . t("About") . "<h3>"; //t() is a translate function instead of doing <h3> About <h3>
-      $output .= "<p>" . t("This is the about page of the module music search") . "<p>";
+      $output .= "<p>" . t("You can activate the music search block in order to use the music search module or you can simply route to /radio_buttons_form") . "<p>";
       return $output;
     default:
   }

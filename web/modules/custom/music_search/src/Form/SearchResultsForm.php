@@ -55,22 +55,17 @@ class SearchResultsForm extends ConfigFormBase {
    * {@inheritDoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-
     $data = json_decode($this->spotify_service->get_data());
     $options = [];
     foreach($data as $stuff ) {
       foreach($stuff->items as $item) {
-        //$b =$item->name;
         array_push($options,$item->name);
-
       }
     }
     $form['search_type'] = array(
       '#type' => 'checkboxes',
       '#options' => $options
     );
-
-
     return $form;
   }
 

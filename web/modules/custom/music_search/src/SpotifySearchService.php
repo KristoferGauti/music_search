@@ -5,6 +5,7 @@ namespace Drupal\music_search;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use http\Message\Body;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class SpotifySearchService {
 
@@ -15,6 +16,10 @@ class SpotifySearchService {
 
   public function __construct(ConfigFactoryInterface $configFactory) {
     $this->configFactory = $configFactory;
+  }
+
+  public function get_radio_button_value() {
+    return $this->configFactory->get("music_search.search")->get("rad_val");
   }
 
   public function get_data() {

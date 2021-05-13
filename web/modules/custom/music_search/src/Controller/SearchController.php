@@ -35,19 +35,10 @@ class SearchController extends ControllerBase {
     );
   }
   public function search_results() {
-    $json_obj = json_decode($this->spotify_service->get_data());
-    $results = array();
-    foreach($json_obj as $property) {
-      foreach($property->items as $item) {
-        array_push($results, $item);
-        $name = $item->name;
 
-        $breakpoint = 0;
-      }
-    }
-    return $results;
-//    return [
-//      "#markup" => $this->$results
-//    ];
+
+    return [
+      "#markup" => $this->t("hello")
+    ];
   }
 }

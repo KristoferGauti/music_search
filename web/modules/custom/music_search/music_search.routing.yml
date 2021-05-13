@@ -18,7 +18,7 @@ music_search.search_form:
   path: "/music_search"
   defaults:
     _form: Drupal\music_search\Form\MusicSearchForm
-    _title: "Search in spotify and Discogs"
+    _title: "Search in Spotify and Discogs"
   requirements:
     _permission: "administer site configuration"
 
@@ -29,6 +29,15 @@ music_search.search_results_form:
     _title: "Choose the right data"
   requirements:
     _permission: "access content"
+
+music_search.radio_button_form:
+  path: /radio_buttons_form
+  defaults:
+    _form: Drupal\music_search\Form\RadioButtonForm
+    _title: "Please choose the right category to search"
+  requirements:
+    _permission: "access content"
+
 
 
 

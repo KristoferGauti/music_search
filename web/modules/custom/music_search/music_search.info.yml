@@ -1,5 +1,5 @@
 name: Music Search
-description: Music search that searches for a song on Spotify or Discogs using API calls
+description: Music search that searches for a song on Spotify or Discogs using API calls. To start using the module, route to /radio_buttons_form.
 type: module
 core_version_requirement: ^9
 package: custom

@@ -14,8 +14,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @package Drupal\music_search\Form
  */
-class MusicSearchForm extends ConfigFormBase {
-
+class RadioButtonForm extends ConfigFormBase {
   /**
    * {@inheritDoc}
    */
@@ -27,24 +26,26 @@ class MusicSearchForm extends ConfigFormBase {
    * {@inheritDoc}
    */
   public function getFormId() {
-    return "music_search_form";
+    return "search_results";
   }
 
   /**
    * {@inheritDoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    $type = $this->config("music_search.search")->get("rad_val");
-    $form["search_field"] = [
-      "#type" => "textfield",
-      "#title" => $this->t("Search for " . $type),
-      "#description" => $this->t("Please provide an " . $type . " name to search"),
-      "#autocomplete_route_name" => "music_search.autocomplete"
-    ];
-    $form["Search"] = [
+    $form['radio_values'] = array(
+      '#type' => 'radios',
+      '#title' => t('Search Type'),
+      '#options' => [
+        t('Artist'),
+        t('Album'),
+        t('Track'),
+      ]);
+    $form["Continue"] = [
       "#type" => "submit",
-      "#value" => "Search"
+      "#value" => "Continue"
     ];
+
     return $form;
   }
 
@@ -52,10 +53,22 @@ class MusicSearchForm extends ConfigFormBase {
    * {@inheritDoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $radio_index = $form_state->getValue("radio_values");
+    $radio_value = "";
+    switch ($radio_index) {
+      case 0:
+        $radio_value = "artist";
+        break;
+      case 1:
+        $radio_value = "album";
+        break;
+      case 2:
+        $radio_value = "track";
+    }
     $this->config("music_search.search")
-      ->set("spotify_search", $form_state->getValue("search_field"))
+      ->set("rad_val", $radio_value)
       ->save();
-    $form_state->setRedirectUrl(Url::fromUri('internal:/search_results_form'));
+    $form_state->setRedirectUrl(Url::fromUri('internal:/music_search'));
     parent::submitForm($form, $form_state);
   }
 
