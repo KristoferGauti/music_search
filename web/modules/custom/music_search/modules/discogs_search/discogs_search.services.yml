@@ -1,0 +1,4 @@
+services:
+  discogs_search.search:
+    class: Drupal\music_search\discogs_search\DiscogsSearchService
+    arguments: ["@config.factory"]
