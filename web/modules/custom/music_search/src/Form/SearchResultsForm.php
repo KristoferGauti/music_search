@@ -90,6 +90,10 @@ class SearchResultsForm extends ConfigFormBase {
       '#type' => 'checkboxes',
       '#options' => $options,
     );
+    $form["Continue"] = [
+      "#type" => "submit",
+      "#value" => "Continue"
+    ];
     return $form;
   }
 
@@ -97,6 +101,11 @@ class SearchResultsForm extends ConfigFormBase {
    * {@inheritDoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $values_list = $form_state->getValue('name');
+    $this->config("music_search.search_results")
+      ->set("checkbox_values", $values_list)
+      ->save();
+    $form_state->setRedirectUrl(Url::fromUri('internal:/confirmation_form'));
     parent::submitForm($form, $form_state);
   }
 
