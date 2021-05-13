@@ -79,7 +79,6 @@ class SearchResultsForm extends ConfigFormBase {
     }
     $form['name'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Name'),
       '#options' => $options,
     );
     return $form;

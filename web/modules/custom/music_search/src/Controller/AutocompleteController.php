@@ -47,7 +47,7 @@ class AutocompleteController extends ControllerBase {
     $counter = 1;
     foreach($json_obj as $property) {
       foreach($property->items as $item) {
-        $search_result = $item->name;
+        $search_result = $item->name . " - Spotify";
         if ($counter <= 100) {
           array_push($results, $search_result);
           $counter += 1;
