@@ -45,6 +45,7 @@ class MusicSearchForm extends ConfigFormBase {
       "#type" => "submit",
       "#value" => "Search"
     ];
+
     return $form;
   }
 

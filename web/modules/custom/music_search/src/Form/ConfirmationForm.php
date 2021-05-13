@@ -36,14 +36,21 @@ class ConfirmationForm extends ConfigFormBase
   /**
    * {@inheritDoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state)
-  {
-    $checkbox_values = $this->config("music_search.search_results")->get("checkbox_values");
+  public function buildForm(array $form, FormStateInterface $form_state){
+    //$data = json_decode($this->spotify_service->get_data());
 
+    $checkbox_values = $this->config("music_search.search_results")->get("checkbox_values");
+    $a=0;
+    $stuff_to_show =[];
+    foreach($checkbox_values as $value) {
+      if($value) {
+        array_push($stuff_to_show, $value);
+      }
+  }
 
     $form['name'] = array(
       '#type' => 'checkboxes',
-      '#options' => $checkbox_values,
+      '#options' => $stuff_to_show,
     );
     $form["Continue"] = [
       "#type" => "submit",
