@@ -20,7 +20,7 @@ music_search.search_form:
     _form: Drupal\music_search\Form\MusicSearchForm
     _title: "Search in Spotify and Discogs"
   requirements:
-    _permission: "administer site configuration"
+    _permission: "access content"
 
 music_search.search_results_form:
   path: /search_results_form

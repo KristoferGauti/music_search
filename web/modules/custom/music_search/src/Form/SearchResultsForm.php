@@ -57,14 +57,25 @@ class SearchResultsForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $data = json_decode($this->spotify_service->get_data());
     $options = [];
+    $imgs_form = "";
+
+
     foreach($data as $stuff ) {
       foreach($stuff->items as $item) {
+
+        if($item->images != null and $item->images[0]->url) {
+          $img_url = $item->images[0]->url;
+          $str_image = '<img src=' . $img_url . ' width = "100" >';
+          $name = '<p id="name">'.$item->name.'</p>';
+          $imgs_form = $imgs_form.$name.$str_image;
+        }
         array_push($options,$item->name);
       }
     }
-    $form['search_type'] = array(
-      '#type' => 'checkboxes',
-      '#options' => $options
+    $form['name'] = array(
+      '#type' => 'markup',
+      '#title' => t('Name'),
+      '#markup' => $imgs_form,
     );
     return $form;
   }
