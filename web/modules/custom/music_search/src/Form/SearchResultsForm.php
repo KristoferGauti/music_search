@@ -64,12 +64,11 @@ class SearchResultsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $discogs_data = $this->discogs_service->get_data();
-    \Drupal::messenger()->addMessage(strval($discogs_data));
     $data = json_decode($this->spotify_service->get_data());
     $options = [];
     $radio_value = $this->config("music_search.search")->get("rad_val");
 
-    foreach($data as $stuff ) {
+    foreach($data as $stuff) {
       foreach($stuff->items as $item) {
         if ($radio_value =='track')  {
           $img_url_one = $item->album->images;

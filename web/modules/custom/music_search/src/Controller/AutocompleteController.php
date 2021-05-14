@@ -45,19 +45,26 @@ class AutocompleteController extends ControllerBase {
       return new JsonResponse($results);
     }
     $spotify_uri = "https://api.spotify.com/v1/search?q=" . $input .  "&type=" . $type;
-    //$discogs_uri =
+    $discogs_uri = "https://api.discogs.com/database/search?q=". $input . "&" . $type;
     $json_obj_spotify = json_decode($this->spotify_service->_spotify_api_get_query($spotify_uri));
-    //$json_obj_discogs = json_decode($this->discogs_service->_discogs_api_get_query($discogs_uri));
+    $json_obj_discogs = json_decode($this->discogs_service->_discogs_api_get_query($discogs_uri));
 
     $results = [];
     $counter = 1;
     foreach($json_obj_spotify as $property) {
       foreach($property->items as $item) {
         $search_result = $item->name . " - Spotify";
-        if ($counter <= 100) {
+        if ($counter <= 10) {
           array_push($results, $search_result);
           $counter += 1;
         }
+      }
+    }
+
+    foreach($json_obj_discogs->results as $item) {
+      if ($counter <= 21) {
+        array_push($results, $item->title . " - Discogs");
+        $counter += 1;
       }
     }
     return new JsonResponse($results);
