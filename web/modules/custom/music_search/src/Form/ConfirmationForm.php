@@ -11,6 +11,7 @@ use http\Env\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use function GuzzleHttp\Psr7\str;
 
+
 /**
  * Class MusicSearchForm
  *
@@ -61,6 +62,7 @@ class ConfirmationForm extends ConfigFormBase
     $checkbox_values = $this->config("music_search.search_results")->get("checkbox_values");
     $radio_value = $this->config("music_search.search")->get("rad_val");
     $data = json_decode($this->spotify_service->get_data());
+    //global $results;
     $results = []; //this gets all info thats neccessary from the users selection.
     if ($radio_value == 'artist') {
       foreach($checkbox_values as $index) {
@@ -111,8 +113,9 @@ class ConfirmationForm extends ConfigFormBase
         }
       }
     }
-
-
+    $this->config("music_search.search_results")
+      ->set("result_list", $results)
+      ->save();
 
 
 
@@ -160,6 +163,57 @@ class ConfirmationForm extends ConfigFormBase
    */
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
+
+
+//    $values = $node->get('field_multiple')->getValue();
+//    $values[] = ['value' => 'extra value'];
+//    $node->set('field_multiple', $values);
+    // for me learning
+
+
+
+
+
+
+    $data = $this->config('music_search.search_results')->get("result_list");
+    $radio_value = $this->config("music_search.search")->get("rad_val");
+//----------------------------Beginning of the end-----------------
+//    if ($radio_value == 'artist') {
+//      $type = \Drupal::entityTypeManager()->getStorage('node_type')->load('artist');
+//      $values = array(
+//
+//      );
+//    } elseif ($radio_value == 'album') {
+//      $type = \Drupal::entityTypeManager()->getStorage('node_type')->load('album');
+//      $values = array(
+//        'field_artist_reference' => [
+//          ['target_id' => $]
+//        ]
+//      );
+//
+//    } else { //this is: track
+//      $type = \Drupal::entityTypeManager()->getStorage('node_type')->load('songs');
+//---------------------------------Helper material--------------
+//    }
+//    $values = array(
+//      'type' => 'players',
+//      'uid' => $user->uid,
+//      'status' => 1,
+//      'promote' => 0,
+//    );
+//    $entity = entity_create('node', $values);
+//
+//// Then create an entity_metadata_wrapper around the new entity.
+//    $wrapper = entity_metadata_wrapper('node', $entity);
+//
+//// Now assign values through the wrapper.
+//    $wrapper->title->set($email_address);
+//    $wrapper->field_first_name->set($first_name);
+//// ...
+//
+//// Finally save the node.
+//    $wrapper->save();
+//----------------------------------Helper material ends------------
     parent::submitForm($form, $form_state);
   }
 }
