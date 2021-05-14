@@ -1,6 +1,6 @@
-#Tónlistar-leitareining (music-search)
+Tónlistar-leitareining (music-search)
 
-##Installation process
+Installation process
 First install Docker, ddev and composer.
 Clone the repository and set your current working directory to the music_search directory.
 run this command to install all its dependencies
