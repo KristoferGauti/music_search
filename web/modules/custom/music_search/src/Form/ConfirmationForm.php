@@ -64,24 +64,41 @@ class ConfirmationForm extends ConfigFormBase
     $data = json_decode($this->spotify_service->get_data());
     //global $results;
     $results = []; //this gets all info thats neccessary from the users selection.
-    if ($radio_value == 'artist') {
-      foreach($checkbox_values as $index) {
-        if(is_string($index)) {
-          $artist_data = $data->artists->items[$index];
-          $artist_array = [];
-          $artist_name = $artist_data->name;
+//    if ($radio_value == 'artist') {
+//      foreach($checkbox_values as $index) {
+//        if(is_string($index)) {
+//          $artist_data = $data->artists->items[$index];
+//          $artist_array = [];
+//          $artist_name = $artist_data->name;
+//
+//          array_push($artist_array, $artist_name);
+//          //For genre edge case, if genre is null.
+//          if($artist_data->genres) {
+//            $artist_genre = $artist_data->genres[0];
+//            array_push($artist_array, $artist_genre);
+//          } elseif($artist_data->images){ //Edge case where thumbnail does not exist.
+//            $artist_image = $artist_data->images[0]->url;
+//            $str_image = '<img class = "stuff" src=' . $artist_image . ' width = "200" >';
+//            array_push($artist_array,$str_image);
+//          }
+//          array_push($results, $artist_array);
+//        }
+//      }
+//    }
 
-          array_push($artist_array, $artist_name);
-          //For genre edge case, if genre is null.
-          if($artist_data->genres) {
-            $artist_genre = $artist_data->genres[0];
-            array_push($artist_array, $artist_genre);
-          } elseif($artist_data->images){ //Edge case where thumbnail does not exist.
-            $artist_image = $artist_data->images[0]->url;
-            $str_image = '<img class = "stuff" src=' . $artist_image . ' width = "200" >';
-            array_push($artist_array,$str_image);
+    if ($radio_value == "artist") {
+      $new_data = $data->artists->items;
+      foreach($checkbox_values as $index) {
+        $temp = [];
+        if (is_string($index)) {
+          $data_list = $new_data[$index];
+          if (sizeof($data_list->genres) != 0 or sizeof($data_list->images) != 0) {
+            array_push($temp, $data_list->name, $data_list->id, '<img src=' . $data_list->images[0]->url . ' width = "200" >' , $data_list->genres[0]);
           }
-          array_push($results, $artist_array);
+          else {
+            array_push($temp, $data_list->name, $data_list->id);
+          }
+          array_push($results,$temp);
         }
       }
     } elseif ($radio_value == 'album') {
