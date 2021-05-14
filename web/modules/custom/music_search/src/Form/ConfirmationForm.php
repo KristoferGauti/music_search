@@ -65,44 +65,31 @@ class ConfirmationForm extends ConfigFormBase
   public function buildForm(array $form, FormStateInterface $form_state){
     $checkbox_values = $this->config("music_search.search_results")->get("checkbox_values");
     $radio_value = $this->config("music_search.search")->get("rad_val");
-    $discogs_data = $this->discogs_service->get_data();
     $data = json_decode($this->spotify_service->get_data());
-    $results = []; //this gets all info thats neccessary from the users selection.
-//    if ($radio_value == 'artist') {
-//      foreach($checkbox_values as $index) {
-//        if(is_string($index)) {
-//          $artist_data = $data->artists->items[$index];
-//          $artist_array = [];
-//          $artist_name = $artist_data->name;
-//
-//          array_push($artist_array, $artist_name);
-//          //For genre edge case, if genre is null.
-//          if($artist_data->genres) {
-//            $artist_genre = $artist_data->genres[0];
-//            array_push($artist_array, $artist_genre);
-//          } elseif($artist_data->images){ //Edge case where thumbnail does not exist.
-//            $artist_image = $artist_data->images[0]->url;
-//            $str_image = '<img class = "stuff" src=' . $artist_image . ' width = "200" >';
-//            array_push($artist_array,$str_image);
-//          }
-//          array_push($results, $artist_array);
-//        }
-//      }
-//    }
+    $discogs_data = $this->discogs_service->get_data();
+    $results_spotify = [];
+    $results_discogs = [];
 
     if ($radio_value == "artist") {
       $new_data = $data->artists->items;
       foreach($checkbox_values as $index) {
         $temp = [];
         if (is_string($index)) {
-          $data_list = $new_data[$index];
-          if (sizeof($data_list->genres) != 0 or sizeof($data_list->images) != 0) {
-            array_push($temp, $data_list->name, $data_list->id, '<img src=' . $data_list->images[0]->url . ' width = "200" >' , $data_list->genres[0]);
+          $item = $new_data[$index];
+          $name = "<strong>Artist name: " . $item->name . "</strong>";
+          $id = "Spotify ID: " . $item->id;
+          if (sizeof($item->genres) != 0 or sizeof($item->images) != 0) {
+            $thumbnail_url = $item->images[0]->url;
+            $genre = "Genre: " . $item->genres[0];
+            array_push($temp, $name , $id, $genre, '<img src=' . $thumbnail_url . ' width = "200" >');
           }
           else {
-            array_push($temp, $data_list->name, $data_list->id);
+            array_push($temp, $name, $id);
           }
-          array_push($results,$temp);
+          array_push($results_spotify, $temp);
+        }
+        else {
+          break;
         }
       }
 
@@ -112,87 +99,72 @@ class ConfirmationForm extends ConfigFormBase
           $album_array = [];
           $album_data = $data->albums->items[$index];
           $album_image = $album_data->images[0]->url;
+          $album_spotify_id = "Spotify ID: " . $album_data->id;
           $str_image = '<img class = "stuff" src=' . $album_image . ' width = "200" >';
-          $album_artist = $album_data->artists[0]->name;
-          $album_name = $album_data->name;
-          $album_release_date = $album_data->release_date;
-          array_push($album_array,$str_image, $album_artist,$album_name,$album_release_date);
-          array_push($results,$album_array);
+          $album_artist = "Artist name: " . $album_data->artists[0]->name;
+          $album_name = "<strong>Album name: " . $album_data->name . "</strong>";
+          $album_release_date = "Album relesed date: " . $album_data->release_date;
+          array_push($album_array, $album_name, $album_spotify_id, $album_artist, $album_release_date, $str_image);
+          array_push($results_spotify, $album_array);
+        }
+        else {
+          break;
         }
       }
-    } else { //this is: track
+    } else {
       foreach($checkbox_values as $index) {
+        $track_array = [];
         if(is_string($index)){
-          $track_array = [];
           $track_data = $data->tracks->items[$index];
-          $track_performer = $track_data->artists[0]->name;
-          $track_name = $track_data->name;
-          $track_image = $track_data->album->images[0]->url;
-          $str_image = '<img class = "stuff" src=' . $track_image . ' width = "200" >';
-          $track_duration = ($track_data->duration_ms)/1000;
-          array_push($track_array,$str_image,$track_performer,$track_name,$track_duration);
-          array_push($results,$track_array);
+          $track_performer = "Artist name: " . $track_data->artists[0]->name;
+          $track_name = "<strong>Track name: " . $track_data->name . "</strong>";
+          $track_image_url = $track_data->album->images[0]->url;
+          $str_image = '<img class = "stuff" src=' . $track_image_url . ' width = "200" >';
+          $track_duration = "Track duration: " . (($track_data->duration_ms)/1000);
+          array_push($track_array,  $track_name, $track_performer, $track_duration, $str_image);
+          array_push($results_spotify, $track_array);
+        }
+        else {
+          break;
         }
       }
     }
 
-    //$discogs_data->:
-    //              ->title
-    //              ->thumb
-    //              ->id
-    foreach($checkbox_values as $index) {
+    $discogs_checkbox_values = $this->config("music_search.search_results")->get("discogs_checkbox_values");
+    foreach($discogs_checkbox_values as $index) {
       $album_arr = [];
       if(is_string($index)){
-        $disc = $discogs_data[intval($index)];
-        $id = $disc->id;
-        $title =$disc->title;
-        $thumb =$disc->thumb;
+        $item = $discogs_data[intval($index)];
+        $id = "Discogs ID:" . $item->id;
+        $title = "<strong>Title: " . $item->title . "</strong>";
+        $thumb = $item->thumb;
         $thumb_html = '<img class = "stuff" src=' . $thumb . ' width = "200" >';
-        array_push($album_arr, $thumb_html,$title,$id);
-        array_push($results,$album_arr);
+        array_push($album_arr, $title, $id, $thumb_html);
+        array_push($results_discogs, $album_arr);
       }else {
         break;
       }
     }
 
+    //fix this for discogs
     $this->config("music_search.search_results")
-      ->set("result_list", $results)
+      ->set("result_list", $results_spotify)
       ->save();
 
 
-
-
-
-
-    $stuff = [];
-    foreach($results as $result) {
-      //array_push($stuff,"<hr/>");
-      foreach($result as $elem) {
-        array_push($stuff, $elem);
-      }
-    }
-
     $form['name'] = array(
       '#type' => 'checkboxes',
-      '#options' => $stuff,
+      "#title" => "Spotify Data",
+      '#options' => $this->_format_into_a_option_list($results_spotify),
     );
 
-//    $form['listings'] = array(
-//      '#type' => 'tableselect',
-//      //'#header' => $divider,
-//      '#options' => $stuff,
-//      '#empty' => t('No Listing available.'),
-    //);
-//    $form['html'] = array(
-//      '#type' => 'html',
-//      '#markup' => $divider,
-//    );
+    $form['Discogs_name'] = array(
+      '#type' => 'checkboxes',
+      "#title" => "Discogs Data",
+      '#options' => $this->_format_into_a_option_list($results_discogs),
+    );
 
-//
-//    $form['name'] = array(
-//      '#type' => 'checkboxes',
-//      '#options' => $results,
-//    );
+
     $form["Continue"] = [
       "#type" => "submit",
       "#value" => "Continue"
@@ -257,5 +229,16 @@ class ConfirmationForm extends ConfigFormBase
 //    $wrapper->save();
 //----------------------------------Helper material ends------------
     parent::submitForm($form, $form_state);
+  }
+
+  private function _format_into_a_option_list($arr) {
+    $options_list = [];
+    foreach($arr as $result) {
+      //array_push($stuff,"<hr/>");
+      foreach($result as $elem) {
+        array_push($options_list, $elem);
+      }
+    }
+    return $options_list;
   }
 }

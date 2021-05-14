@@ -67,17 +67,16 @@ class SearchResultsForm extends ConfigFormBase {
     $spotify_data = json_decode($this->spotify_service->get_data());
     $spotify_options_array = $this->_prettify_spotify_data($spotify_data);
     $discogs_options_array = $this->_prettify_discogs_data($discogs_data);
-    $all_data = array_merge($spotify_options_array, $discogs_options_array);
     $form['name'] = array(
       '#type' => 'checkboxes',
       '#title' => '<h1>Spotify Results</h1>',
-      '#options' => $all_data,
+      '#options' => $spotify_options_array,
     );
-//    $form['name_discogs'] = array(
-//      '#type' => 'checkboxes',
-//      '#title' => '<h1>Discogs Results</h1>',
-//      '#options' => $discogs_options_array,
-//    );
+    $form['name_discogs'] = array(
+      '#type' => 'checkboxes',
+      '#title' => '<h1>Discogs Results</h1>',
+      '#options' => $discogs_options_array,
+    );
 
     $form["Continue"] = [
       "#type" => "submit",
@@ -91,11 +90,10 @@ class SearchResultsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values_list = $form_state->getValue('name');
-
-    $all_items = $form['name']['#options'];
+    $discogs_values_list = $form_state->getValue("name_discogs");
     $this->config("music_search.search_results")
       ->set("checkbox_values", $values_list)
-      ->set("all_items", $all_items)
+      ->set("discogs_checkbox_values", $discogs_values_list)
       ->save();
     $form_state->setRedirectUrl(Url::fromUri('internal:/confirmation_form'));
     parent::submitForm($form, $form_state);
@@ -123,11 +121,16 @@ class SearchResultsForm extends ConfigFormBase {
     }
 
     foreach ($new_data as $item) {
-      if (sizeof($item->images) != 0) {
-        $html_string = $this->html_template($item->name, $item->id, $item->images[0]->url);
+      if (property_exists($item, "images")) {
+        if (sizeof($item->images) != 0) {
+          $html_string = $this->html_template($item->name, $item->id, $item->images[0]->url);
+        }
+        else {
+          $html_string = $this->html_template($item->name, $item->id, null);
+        }
       }
       else {
-        $html_string = $this->html_template($item->name, $item->id, null);
+        $html_string = $this->html_template($item->name, $item->id, $item->album->images[0]->url);
       }
       array_push($options, $html_string);
     }
