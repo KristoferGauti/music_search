@@ -8,3 +8,10 @@ music_search.settings:
     spotify_client_secret:
       type: text
       label: "spotify_client_secret"
+    discogs_consumer_key:
+      type: text
+        label: "discogs_consumer_key"
+    discogs_consumer_secret:
+      type: text
+        label: "discogs_consumer_secret"
+

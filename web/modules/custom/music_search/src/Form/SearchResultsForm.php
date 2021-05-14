@@ -5,6 +5,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\music_search\DiscogsSearchService;
 use Drupal\music_search\SpotifySearchService;
 use http\Env\Response;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -21,12 +22,18 @@ class SearchResultsForm extends ConfigFormBase {
   protected $spotify_service;
 
   /**
+   * @var \Drupal\music_search\DiscogsSearchService
+   */
+  protected $discogs_service;
+
+  /**
    * SearchController constructor.
    *
    * @param \Drupal\music_search\SpotifySearchService $spotify_service
    */
-  public function __construct(SpotifySearchService $spotify_service) {
+  public function __construct(SpotifySearchService $spotify_service, DiscogsSearchService $discogs_service) {
     $this->spotify_service = $spotify_service;
+    $this->discogs_service = $discogs_service;
   }
 
   /**
@@ -34,7 +41,8 @@ class SearchResultsForm extends ConfigFormBase {
    */
   public static function create(ContainerInterface $container) {
     return new static (
-      $container->get("music_search.search")
+      $container->get("music_search.search"),
+      $container->get("discogs_search.search")
     );
   }
   /**
@@ -55,6 +63,8 @@ class SearchResultsForm extends ConfigFormBase {
    * {@inheritDoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $discogs_data = $this->discogs_service->get_data();
+    \Drupal::messenger()->addMessage(strval($discogs_data));
     $data = json_decode($this->spotify_service->get_data());
     $options = [];
     $radio_value = $this->config("music_search.search")->get("rad_val");
@@ -87,11 +97,17 @@ class SearchResultsForm extends ConfigFormBase {
       }
     }
 
-
     $form['name'] = array(
       '#type' => 'checkboxes',
+      '#title' => 'Spotify Results',
       '#options' => $options,
     );
+//    $form['name_discogs'] = array(
+//      '#type' => 'checkboxes',
+//      '#title' => 'Discogs Results',
+//      '#options' => $options,
+//    );
+
     $form["Continue"] = [
       "#type" => "submit",
       "#value" => "Continue"
@@ -105,8 +121,6 @@ class SearchResultsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values_list = $form_state->getValue('name');
     $all_items = $form['name']['#options'];
-    $a = 10;
-    //complete_form(array)->name(array)->options(array)
     $this->config("music_search.search_results")
       ->set("checkbox_values", $values_list)
       ->set("all_items", $all_items)

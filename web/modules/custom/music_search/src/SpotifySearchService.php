@@ -58,9 +58,9 @@ class SpotifySearchService {
    * Gets Auth token from the Spotify API
    */
   private function _spotify_api_get_auth_token() {
-    $default_config = \Drupal::config("music_search.settings");
-    $SPOTIFY_API_CLIENT_ID = $default_config->get("spotify_client_id");
-    $SPOTIFY_API_CLIENT_SECRET = $default_config->get("spotify_client_secret");
+    $custom_config = \Drupal::config("music_search.settings");
+    $SPOTIFY_API_CLIENT_ID = $custom_config->get("spotify_client_id");
+    $SPOTIFY_API_CLIENT_SECRET = $custom_config->get("spotify_client_secret");
     $connection_string = "https://accounts.spotify.com/api/token";
     $key = base64_encode($SPOTIFY_API_CLIENT_ID . ':' . $SPOTIFY_API_CLIENT_SECRET);
     $ch = curl_init();
