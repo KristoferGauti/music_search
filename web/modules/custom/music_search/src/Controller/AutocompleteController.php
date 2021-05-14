@@ -57,6 +57,8 @@ class AutocompleteController extends ControllerBase {
         if ($counter <= 10) {
           array_push($results, $search_result);
           $counter += 1;
+        } else {
+          break;
         }
       }
     }
@@ -65,6 +67,8 @@ class AutocompleteController extends ControllerBase {
       if ($counter <= 21) {
         array_push($results, $item->title . " - Discogs");
         $counter += 1;
+      } else {
+        break;
       }
     }
     return new JsonResponse($results);

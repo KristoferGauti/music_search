@@ -21,7 +21,8 @@ class DiscogsSearchService {
     $user_input = $config->get("spotify_search");
     $radio_button_value = $config->get("rad_val");
     $query_string = "https://api.discogs.com/database/search?q=". $user_input . "&" . $radio_button_value;
-    return $this->_discogs_api_get_query($query_string);
+    $all_items = $this->_discogs_api_get_query($query_string);
+    return json_decode($all_items)->results;
   }
 
 
