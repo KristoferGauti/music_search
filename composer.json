@@ -26,7 +26,8 @@
         "drupal/module_filter": "^3.2",
         "drush/drush": "^10.4",
         "ext-curl": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+      "ext-dom": "*"
     },
     "conflict": {
         "drupal/drupal": "*"
