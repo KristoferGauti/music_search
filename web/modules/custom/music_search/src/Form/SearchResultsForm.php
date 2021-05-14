@@ -104,8 +104,12 @@ class SearchResultsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values_list = $form_state->getValue('name');
+    $all_items = $form['name']['#options'];
+    $a = 10;
+    //complete_form(array)->name(array)->options(array)
     $this->config("music_search.search_results")
       ->set("checkbox_values", $values_list)
+      ->set("all_items", $all_items)
       ->save();
     $form_state->setRedirectUrl(Url::fromUri('internal:/confirmation_form'));
     parent::submitForm($form, $form_state);

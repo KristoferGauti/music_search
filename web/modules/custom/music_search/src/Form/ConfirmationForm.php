@@ -40,13 +40,15 @@ class ConfirmationForm extends ConfigFormBase
     //$data = json_decode($this->spotify_service->get_data());
 
     $checkbox_values = $this->config("music_search.search_results")->get("checkbox_values");
-    $a=0;
+    $all_items_html_tags = $this->config('music_search.search_results')->get('all_items');
     $stuff_to_show =[];
     foreach($checkbox_values as $value) {
-      if($value) {
-        array_push($stuff_to_show, $value);
+      if(is_string($value) and $value != "null") {
+        array_push($stuff_to_show, $all_items_html_tags[intval($value)]);
+
       }
-  }
+    }
+
 
     $form['name'] = array(
       '#type' => 'checkboxes',
