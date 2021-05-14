@@ -1,6 +1,7 @@
 <?php
 namespace Drupal\music_search\Form;
 
+use DOMDocument;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
@@ -48,6 +49,8 @@ class ConfirmationForm extends ConfigFormBase
 
       }
     }
+    //<div><p> Name: goosebumps</p><p> Spotify ID: 6gBFPUFcJLzWGx4lenP6h2</p><img src=https://i.scdn.co/image/ab67616d0000b273f54b99bf27cda88f4a7403ce width = "400" ></div>
+
 
 
     $form['name'] = array(

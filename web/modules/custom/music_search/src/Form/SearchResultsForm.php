@@ -73,15 +73,15 @@ class SearchResultsForm extends ConfigFormBase {
 
         if($img_url_one != null and $img_url_two) {
           $img_url = $img_url_two;
-          $name = '<p> Name: '.$item->name.'</p>';
-          $spotify_id = '<p> Spotify ID: ' . $item->id . '</p>';
-          $str_image = '<img src=' . $img_url . ' width = "400" >';
+          $name = '<p class = "stuff"> Name: '.$item->name.'</p>';
+          $spotify_id = '<p class = "stuff"> Spotify ID: ' . $item->id . '</p>';
+          $str_image = '<img class = "stuff" src=' . $img_url . ' width = "400" >';
 
           $html_string = "<div>". $name . $spotify_id . $str_image . "</div>";
           array_push($options, $html_string);
         }
         else {
-          $no_thumbnail_html_string = "<div><p>" . $item->name . "</p><p>No thumbnail available</p></div>";
+          $no_thumbnail_html_string = '<div><p class = "stuff">' . $item->name . "</p><p>No thumbnail available</p></div>";
           array_push($options, $no_thumbnail_html_string);
         }
       }
