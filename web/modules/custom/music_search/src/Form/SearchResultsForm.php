@@ -67,17 +67,17 @@ class SearchResultsForm extends ConfigFormBase {
     $spotify_data = json_decode($this->spotify_service->get_data());
     $spotify_options_array = $this->_prettify_spotify_data($spotify_data);
     $discogs_options_array = $this->_prettify_discogs_data($discogs_data);
-
+    $all_data = array_merge($spotify_options_array, $discogs_options_array);
     $form['name'] = array(
       '#type' => 'checkboxes',
       '#title' => '<h1>Spotify Results</h1>',
-      '#options' => $spotify_options_array,
+      '#options' => $all_data,
     );
-    $form['name_discogs'] = array(
-      '#type' => 'checkboxes',
-      '#title' => '<h1>Discogs Results</h1>',
-      '#options' => $discogs_options_array,
-    );
+//    $form['name_discogs'] = array(
+//      '#type' => 'checkboxes',
+//      '#title' => '<h1>Discogs Results</h1>',
+//      '#options' => $discogs_options_array,
+//    );
 
     $form["Continue"] = [
       "#type" => "submit",
@@ -91,6 +91,7 @@ class SearchResultsForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $values_list = $form_state->getValue('name');
+
     $all_items = $form['name']['#options'];
     $this->config("music_search.search_results")
       ->set("checkbox_values", $values_list)
