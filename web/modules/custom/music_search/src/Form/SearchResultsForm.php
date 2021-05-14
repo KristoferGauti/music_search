@@ -61,14 +61,14 @@ class SearchResultsForm extends ConfigFormBase {
 
     foreach($data as $stuff ) {
       foreach($stuff->items as $item) {
-        //edge case for tracks whereas tracks does not have $item->images property, fix this with an if statement
-        //item->album->images[0]->url
         if ($radio_value =='track')  {
           $img_url_one = $item->album->images;
           $img_url_two = $item->album->images[0]->url;
         } else {
           $img_url_one = $item->images;
-          $img_url_two = $item->images[0]->url;
+          if ($img_url_one != null) {
+            $img_url_two = $item->images[0]->url;
+          }
         }
 
         if($img_url_one != null and $img_url_two) {

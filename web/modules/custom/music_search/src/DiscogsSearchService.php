@@ -20,7 +20,7 @@ class DiscogsSearchService {
     $config = $this->configFactory->get("music_search.search");
     $user_input = $config->get("spotify_search");
     $radio_button_value = $config->get("rad_val");
-    $query_string = "https://api.discogs.com/database/search?q={query}&{?type,title,release_title,credit,artist,anv,label,genre,style,country,year,format,catno,barcode,track,submitter,contributor}"
+    $query_string = "https://api.discogs.com/database/search?q={query}&{?type,title,release_title,credit,artist,anv,label,genre,style,country,year,format,catno,barcode,track,submitter,contributor}";
     return $this->_discogs_api_get_query($query_string);
   }
 

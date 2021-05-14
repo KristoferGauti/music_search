@@ -53,8 +53,12 @@ class MusicSearchForm extends ConfigFormBase {
    * {@inheritDoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+    $search_results = $form_state->getValue("search_field");
+    if (str_contains($search_results, " - Spotify") or str_contains($search_results, " - Discogs")) {
+      $search_results = explode(" -", $search_results, $limit=PHP_INT_MAX)[0];
+    }
     $this->config("music_search.search")
-      ->set("spotify_search", $form_state->getValue("search_field"))
+      ->set("spotify_search", $search_results)
       ->save();
     $form_state->setRedirectUrl(Url::fromUri('internal:/search_results_form'));
     parent::submitForm($form, $form_state);

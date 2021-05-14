@@ -1,11 +1,3 @@
-music_search.search:
-  path: "/search_results"
-  defaults:
-    _controller: Drupal\music_search\Controller\SearchController::search_results
-    _title: "Search results"
-  requirements:
-    _permission: "access content"
-
 music_search.autocomplete:
   path: "/autocomplete/artists"
   defaults:
