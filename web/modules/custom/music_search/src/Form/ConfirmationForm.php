@@ -17,6 +17,25 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class ConfirmationForm extends ConfigFormBase
 {
+  protected $spotify_service;
+
+  /**
+   * SearchController constructor.
+   *
+   * @param \Drupal\music_search\SpotifySearchService $spotify_service
+   */
+  public function __construct(SpotifySearchService $spotify_service) {
+    $this->spotify_service = $spotify_service;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static (
+      $container->get("music_search.search")
+    );
+  }
 
   /**
    * {@inheritDoc}
@@ -38,7 +57,51 @@ class ConfirmationForm extends ConfigFormBase
    * {@inheritDoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state){
-    //$data = json_decode($this->spotify_service->get_data());
+    $checkbox_values = $this->config("music_search.search_results")->get("checkbox_values");
+    $radio_value = $this->config("music_search.search")->get("rad_val");
+    $data = json_decode($this->spotify_service->get_data());
+    $results = []; //this gets all info thats neccessary from the users selection.
+    if ($radio_value == 'artist') {
+      foreach($checkbox_values as $index) {
+        $artist_array = [];
+        $artist_data = $data->artists->items[$index];
+        $artist_name = $artist_data->name;
+        $artist_image = $artist_data->images[0]->url;
+        //add images.
+        $artist_genre = $artist_data->genres[0];
+        array_push($artist_array,$artist_image,$artist_name,$artist_genre);
+        array_push($results,$artist_array);
+      }
+    } elseif ($radio_value == 'album') {
+      foreach ($checkbox_values as $index) {
+        $album_array = [];
+        $album_data = $data->albums->items[$index];
+        $album_image = $album_data->images[0]->url;
+        $album_artist = $album_data->artists[0]->name;
+        $album_name = $album_data->name;
+        $album_release_date = $album_data->release_date;
+        array_push($album_array,$album_image, $album_artist,$album_name,$album_release_date);
+        array_push($results,$album_array);
+      }
+    } else { //this is: track
+      foreach($checkbox_values as $index) {
+        $track_array = [];
+        $track_data = $data->tracks->items[$index];
+        $track_performer = $track_data->artists[0]->name;
+        $track_name = $track_data->name;
+        $track_image = $track_data->album->images[0]->url;
+        $track_duration = ($track_data->duration_ms)/1000;
+        array_push($track_array,$track_image,$track_performer,$track_name,$track_duration);
+        array_push($results,$track_array);
+      }
+    }
+
+
+
+
+
+
+
 
     $checkbox_values = $this->config("music_search.search_results")->get("checkbox_values");
     $all_items_html_tags = $this->config('music_search.search_results')->get('all_items');
