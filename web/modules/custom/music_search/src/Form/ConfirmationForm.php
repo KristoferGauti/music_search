@@ -69,7 +69,7 @@ class ConfirmationForm extends ConfigFormBase
     $discogs_data = $this->discogs_service->get_data();
     $results_spotify = [];
     $results_discogs = [];
-    $pure_data_spotify =[];
+    $pure_data_spotify = [];
     $pure_data_discogs = [];
 
     $associative_array_of_spotify_data = array();
@@ -151,7 +151,7 @@ class ConfirmationForm extends ConfigFormBase
 
 
           $associative_array_of_spotify_data["track_performer"] = $track_data->artists[0]->name;;
-          $associative_array_of_spotify_data["track_name "] = $track_data->name;;
+          $associative_array_of_spotify_data["track_name"] = $track_data->name;;
           $associative_array_of_spotify_data["track_image_url"] = $track_data->album->images[0]->url;;
           $associative_array_of_spotify_data["track_duration"] = (($track_data->duration_ms)/1000);
           $associative_array_of_spotify_data["track_spotify_id"] = $track_data->id;
@@ -193,10 +193,8 @@ class ConfirmationForm extends ConfigFormBase
         break;
       }
     }
-    //fix this for discogs
+
     $this->config("music_search.search_results")
-      ->set("spotify_pure",$pure_data_spotify)
-      ->set("discogs_pure",$pure_data_discogs)
       ->set("spotify_pure_associative", $associative_array_of_spotify_data)
       ->set("discogs_pure_associative", $associative_array_of_discogs_data)
       ->save();
@@ -228,24 +226,16 @@ class ConfirmationForm extends ConfigFormBase
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
     //We dont need this whereas we have associative arrays!!!! refactor later
-//    $spotify_data = $this->config('music_search.search_results')->get("spotify_pure");
-//    $discogs_data = $this->config('music_search.search_results')->get("discogs_pure");
     $checkbox_values_spotify = $form_state->getValue('name');
     $checkbox_values_discogs = $form_state->getValue('Discogs_name');
 
-//    $spotify_data_chosen = $this->_get_selected_data($spotify_data,$checkbox_values_spotify);
-//    $discogs_data_chosen = $this->_get_selected_data($discogs_data,$checkbox_values_discogs);
     $radio_value = $this->config("music_search.search")->get("rad_val");
 
     $spotify_data = $this->config('music_search.search_results')->get("spotify_pure_associative");
     $discogs_data = $this->config('music_search.search_results')->get("discogs_pure_associative");
 
-    //$this->create_data($radio_value, $spotify_data_chosen);
     $this->create_data($radio_value, $spotify_data);
     //$this->create_data($radio_value, $discogs_data_chosen);
-
-
-
 
       parent::submitForm($form, $form_state);
   }
@@ -261,9 +251,16 @@ class ConfirmationForm extends ConfigFormBase
       $vals['field_published_date'] = $data["album_release_date"];
       //$vals['id'] = $data['album_spotify_id'];
 
-    } else { //this is: track
-        $vals['id'] = $data["track_spotify_id"];
-      // Set values for new song
+    }
+    else { //this is: track
+      $minute_float = floatval(explode(".", strval($data["track_duration"]))[0]) / 60;
+      $seconds_string = intval(floatval("0." . explode(".", $minute_float)[1]) * 60);
+      $vals["type"] = "songs";
+      $vals["title"] = $data["track_name"];
+      $vals['field_spotify_id'] = $data["track_spotify_id"];
+      $vals["field_duration"] = strval(intval($minute_float)) . ":" . $seconds_string;
+      //genre entity reference
+
     }
     $node = $store->create($vals);
     $node->save();
@@ -271,15 +268,6 @@ class ConfirmationForm extends ConfigFormBase
   }
 
 
-  /*
-   *  $associative_array_of_spotify_data["album_data"] = $data->albums->items[$index];
-          $associative_array_of_spotify_data["album_image"] = $album_data->images[0]->url;
-          $associative_array_of_spotify_data["album_spotify_id"] = $album_data->id;
-          $associative_array_of_spotify_data["album_image"] = $album_image;
-          $associative_array_of_spotify_data["album_artist"] = $album_data->artists[0]->name;
-          $associative_array_of_spotify_data["album_name"] = $album_data->name;
-          $associative_array_of_spotify_data["album_release_date"] = $album_data->release_date;
-   */
 
 
   private function _format_into_a_option_list($arr) {
