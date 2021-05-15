@@ -207,48 +207,31 @@ class ConfirmationForm extends ConfigFormBase
     //$this->create_data($radio_value, $discogs_data_chosen);
 
 
-//---------------------------------Helper material--------------
-//    }
-//    $values = array(
-//      'type' => 'players',
-//      'uid' => $user->uid,
-//      'status' => 1,
-//      'promote' => 0,
-//    );
-//    $entity = entity_create('node', $values);
-//
-//// Then create an entity_metadata_wrapper around the new entity.
-//    $wrapper = entity_metadata_wrapper('node', $entity);
-//
-//// Now assign values through the wrapper.
-//    $wrapper->title->set($email_address);
-//    $wrapper->field_first_name->set($first_name);
-//// ...
-//
-//// Finally save the node.
-//    $wrapper->save();
-//----------------------------------Helper material ends------------
 
 
       parent::submitForm($form, $form_state);
   }
   public function create_data($type, $data) {
     $store = \Drupal::entityTypeManager()->getStorage('node');
-    $query = $store->getQuery();
+    $vals['type'] = $type;
+    $vals['status'] = 1;
     if ($type == 'artist') {
-      $query
-        ->condition('type','artist');
-
+      // Set values for new artist
     } elseif ($type == 'album') {
-      $query
-        ->condition('type','album');
+      //$vals['field_thumbnail'] = $data[0];
+      $vals['title'] = $data[0];
+      $vals['id'] = $data[2];
+      //$image = file_get_contents($data[0]); // string
+      //$file = file_save_data($image, 'public://druplicon.png',FILE_EXISTS_REPLACE);
+      //$vals['field_thumbnail'] = $file;
+      //$vals['field_published_date'] = $data[''];
 
     } else { //this is: track
-      $query
-        ->condition('type', 'songs');
-      $song_id = $query->execute();
-
+      // Set values for new song
     }
+    $node = $store->create($vals);
+    $node->save();
+    return $node;
   }
 
 
