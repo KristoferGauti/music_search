@@ -202,26 +202,9 @@ class ConfirmationForm extends ConfigFormBase
     $discogs_data_chosen = $this->_get_selected_data($discogs_data,$checkbox_values_discogs);
     $radio_value = $this->config("music_search.search")->get("rad_val");
 
-//----------------------------Beginning of the end-----------------
-    $store = \Drupal::entityTypeManager()->getStorage('node');
-    $query = $store->getQuery();
 
-    if ($radio_value == 'artist') {
-      $values = array();
-    } elseif ($radio_value == 'album') {
-
-
-//      $values = array(
-//        'field_artist_reference' => [
-//          ['target_id' => $]
-//        ]
-//      );
-
-    } else { //this is: track
-      $query
-        ->condition('type','songs');
-      $song_id = $query->execute();
-      $a=1;
+    $this->create_data($radio_value, $spotify_data_chosen);
+    //$this->create_data($radio_value, $discogs_data_chosen);
 
 
 //---------------------------------Helper material--------------
@@ -247,17 +230,16 @@ class ConfirmationForm extends ConfigFormBase
 //----------------------------------Helper material ends------------
 
 
-    }
       parent::submitForm($form, $form_state);
   }
-  public function create_data(string $type, array $data, $radio_value) {
+  public function create_data($type, $data) {
     $store = \Drupal::entityTypeManager()->getStorage('node');
     $query = $store->getQuery();
-    if ($radio_value == 'artist') {
+    if ($type == 'artist') {
       $query
         ->condition('type','artist');
 
-    } elseif ($radio_value == 'album') {
+    } elseif ($type == 'album') {
       $query
         ->condition('type','album');
 
@@ -281,15 +263,21 @@ class ConfirmationForm extends ConfigFormBase
     return $options_list;
   }
 
-
-  private function _get_selected_data($data,$checkbox_data) {
+  private function _get_selected_data($data, $checkbox_data) {
+    $single_list = [];
     $all_data = [];
-    foreach ($checkbox_data as $index) {
-      foreach($data as $item){
-        if(is_string($index)and $index != null) {
-          array_push($all_data, $item[intval($index)]);
-        }
+
+    foreach($data as $item){
+      foreach($item as $attribute) {
+        array_push($single_list, $attribute);
       }
+    }
+
+    foreach ($checkbox_data as $index) {
+      if (is_string($index)) {
+        array_push($all_data, $single_list[intval($index)]);
+      }
+
     }
     return $all_data;
   }
