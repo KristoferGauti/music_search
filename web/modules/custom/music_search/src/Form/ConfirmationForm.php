@@ -257,21 +257,30 @@ class ConfirmationForm extends ConfigFormBase
     if ($type == 'artist') {
       // Set values for new artist
     } elseif ($type == 'album') {
-      //$vals['field_thumbnail'] = $data[0];
-      $vals['title'] = $data["track_name"];
-      $vals['id'] = $data["track_spotify_id"];
-      //$image = file_get_contents($data[0]); // string
-      //$file = file_save_data($image, 'public://druplicon.png',FILE_EXISTS_REPLACE);
-      //$vals['field_thumbnail'] = $file;
-      //$vals['field_published_date'] = $data[''];
+
+      $vals['title'] = $data["album_name"];
+      $vals['field_published_date'] = $data["album_release_date"];
+      //$vals['id'] = $data['album_spotify_id'];
 
     } else { //this is: track
+        $vals['id'] = $data["track_spotify_id"];
       // Set values for new song
     }
     $node = $store->create($vals);
     $node->save();
     return $node;
   }
+
+
+  /*
+   *  $associative_array_of_spotify_data["album_data"] = $data->albums->items[$index];
+          $associative_array_of_spotify_data["album_image"] = $album_data->images[0]->url;
+          $associative_array_of_spotify_data["album_spotify_id"] = $album_data->id;
+          $associative_array_of_spotify_data["album_image"] = $album_image;
+          $associative_array_of_spotify_data["album_artist"] = $album_data->artists[0]->name;
+          $associative_array_of_spotify_data["album_name"] = $album_data->name;
+          $associative_array_of_spotify_data["album_release_date"] = $album_data->release_date;
+   */
 
 
   private function _format_into_a_option_list($arr) {
