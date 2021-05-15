@@ -5,16 +5,16 @@ First install Docker, ddev and composer.
 Clone the repository and set your current working directory to the music_search directory.
 run this command to install all its dependencies
 ```
-  $ composer install
+  composer install
 ```
 In order to run the website, you must configure the database using this command
 ```
-  $ ddev import-db --src=database/database.sql.gz
+  ddev import-db --src=database/database.sql.gz
 ```
 
 To run the program use this command
 ```
-  $ ddev start
+  ddev start
 ```
 Open the site at http://verkefni-2.ddev.site and start using our application.
 If you do not see any media, you have to replace web/sites/default/files folder
