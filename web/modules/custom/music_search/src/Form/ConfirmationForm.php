@@ -120,7 +120,6 @@ class ConfirmationForm extends ConfigFormBase
           $album_name =  $album_data->name;
           $album_release_date = $album_data->release_date;
 
-          $associative_array_of_spotify_data["album_data"] = $data->albums->items[$index];
           $associative_array_of_spotify_data["album_image"] = $album_data->images[0]->url;
           $associative_array_of_spotify_data["album_spotify_id"] = $album_data->id;
           $associative_array_of_spotify_data["album_image"] = $album_image;
