@@ -72,6 +72,9 @@ class ConfirmationForm extends ConfigFormBase
     $pure_data_spotify =[];
     $pure_data_discogs = [];
 
+    $associative_array_of_spotify_data = array();
+    $associative_array_of_discogs_data = array();
+
     if ($radio_value == "artist") {
       $new_data = $data->artists->items;
       foreach($checkbox_values as $index) {
@@ -81,11 +84,16 @@ class ConfirmationForm extends ConfigFormBase
           $item = $new_data[$index];
           $name =  $item->name;
           $id =  $item->id;
+          $associative_array_of_spotify_data["item"] = $new_data[$index];
+          $associative_array_of_spotify_data["name"] = $item->name;
+          $associative_array_of_spotify_data["item"] = $item->id;
           if (sizeof($item->genres) != 0 or sizeof($item->images) != 0) {
             $thumbnail_url = $item->images[0]->url;
             $genre =  $item->genres[0];
             array_push($temp, "<strong>Artist name: " .$name. "</strong>" , "Spotify ID: " .$id, "Genre: " .$genre, '<img src=' . $thumbnail_url . ' width = "200" >');
             array_push($pure_mini,$name , $id, $genre, $thumbnail_url);
+            $associative_array_of_spotify_data["thumb"] = $item->images[0]->url;
+            $associative_array_of_spotify_data["genre"] = $item->genres[0];
           }
           else {
             array_push($temp, $name, $id);
@@ -111,7 +119,17 @@ class ConfirmationForm extends ConfigFormBase
           $album_artist =  $album_data->artists[0]->name;
           $album_name =  $album_data->name;
           $album_release_date = $album_data->release_date;
+
+          $associative_array_of_spotify_data["album_data"] = $data->albums->items[$index];
+          $associative_array_of_spotify_data["album_image"] = $album_data->images[0]->url;
+          $associative_array_of_spotify_data["album_spotify_id"] = $album_data->id;
+          $associative_array_of_spotify_data["album_image"] = $album_image;
+          $associative_array_of_spotify_data["album_artist"] = $album_data->artists[0]->name;
+          $associative_array_of_spotify_data["album_name"] = $album_data->name;
+          $associative_array_of_spotify_data["album_release_date"] = $album_data->release_date;
+
           array_push($album_array, "<strong>Album name: " .$album_name. "</strong>", "Spotify ID: " .$album_spotify_id, "Artist name: " .$album_artist,  "Album relesed date: " .$album_release_date, $str_image);
+          //We dont need this whereas we have associative arrays!!!! refactor later
           array_push($pure_mini, $album_image,$album_name,$album_artist,$album_image,$album_spotify_id);
           array_push($results_spotify, $album_array);
           array_push($pure_data_spotify, $pure_mini);
@@ -127,11 +145,20 @@ class ConfirmationForm extends ConfigFormBase
         if(is_string($index)){
           $track_data = $data->tracks->items[$index];
           $track_performer = $track_data->artists[0]->name;
-          $track_name = $track_data->name ;
+          $track_name = $track_data->name;
           $track_image_url = $track_data->album->images[0]->url;
           $str_image = '<img class = "stuff" src=' . $track_image_url . ' width = "200" >';
           $track_duration = (($track_data->duration_ms)/1000);
+
+
+          $associative_array_of_spotify_data["track_performer"] = $track_data->artists[0]->name;;
+          $associative_array_of_spotify_data["track_name "] = $track_data->name;;
+          $associative_array_of_spotify_data["track_image_url"] = $track_data->album->images[0]->url;;
+          $associative_array_of_spotify_data["track_duration"] = (($track_data->duration_ms)/1000);
+          $associative_array_of_spotify_data["track_spotify_id"] = $track_data->id;
+
           array_push($track_array,  "<strong>Track name: " .$track_name. "</strong>", "Artist name: " . $track_performer, "Track duration: " . $track_duration, $str_image);
+          //We dont need this whereas we have associative arrays!!!! refactor later
           array_push($pure_mini,$track_name,$track_performer,$track_duration,$track_image_url);
           array_push($results_spotify, $track_array);
           array_push($pure_data_spotify, $pure_mini);
@@ -152,7 +179,14 @@ class ConfirmationForm extends ConfigFormBase
         $title =  $item->title ;
         $thumb = $item->thumb;
         $thumb_html = '<img class = "stuff" src=' . $thumb . ' width = "200" >';
+
+
+        $associative_array_of_discogs_data["discogs_id"] =  $item->id;
+        $associative_array_of_discogs_data["title"] = $item->title;
+        $associative_array_of_discogs_data["thumbnail"] = $item->thumb;
+
         array_push($album_arr, "<strong>Title: " .$title. "</strong>", "Discogs ID:" .$id, $thumb_html);
+        //We dont need this whereas we have associative arrays!!!! refactor later
         array_push($pure_mini, $title, $id, $thumb);
         array_push($results_discogs, $album_arr);
         array_push($pure_data_discogs, $pure_mini);
@@ -164,6 +198,8 @@ class ConfirmationForm extends ConfigFormBase
     $this->config("music_search.search_results")
       ->set("spotify_pure",$pure_data_spotify)
       ->set("discogs_pure",$pure_data_discogs)
+      ->set("spotify_pure_associative", $associative_array_of_spotify_data)
+      ->set("discogs_pure_associative", $associative_array_of_discogs_data)
       ->save();
 
 
@@ -192,18 +228,21 @@ class ConfirmationForm extends ConfigFormBase
    */
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
-    $spotify_data = $this->config('music_search.search_results')->get("spotify_pure");
-    $discogs_data = $this->config('music_search.search_results')->get("discogs_pure");
-    $radio_value = $this->config("music_search.search")->get("rad_val");
+    //We dont need this whereas we have associative arrays!!!! refactor later
+//    $spotify_data = $this->config('music_search.search_results')->get("spotify_pure");
+//    $discogs_data = $this->config('music_search.search_results')->get("discogs_pure");
     $checkbox_values_spotify = $form_state->getValue('name');
     $checkbox_values_discogs = $form_state->getValue('Discogs_name');
 
-    $spotify_data_chosen = $this->_get_selected_data($spotify_data,$checkbox_values_spotify);
-    $discogs_data_chosen = $this->_get_selected_data($discogs_data,$checkbox_values_discogs);
+//    $spotify_data_chosen = $this->_get_selected_data($spotify_data,$checkbox_values_spotify);
+//    $discogs_data_chosen = $this->_get_selected_data($discogs_data,$checkbox_values_discogs);
     $radio_value = $this->config("music_search.search")->get("rad_val");
 
+    $spotify_data = $this->config('music_search.search_results')->get("spotify_pure_associative");
+    $discogs_data = $this->config('music_search.search_results')->get("discogs_pure_associative");
 
-    $this->create_data($radio_value, $spotify_data_chosen);
+    //$this->create_data($radio_value, $spotify_data_chosen);
+    $this->create_data($radio_value, $spotify_data);
     //$this->create_data($radio_value, $discogs_data_chosen);
 
 
@@ -219,8 +258,8 @@ class ConfirmationForm extends ConfigFormBase
       // Set values for new artist
     } elseif ($type == 'album') {
       //$vals['field_thumbnail'] = $data[0];
-      $vals['title'] = $data[0];
-      $vals['id'] = $data[2];
+      $vals['title'] = $data["track_name"];
+      $vals['id'] = $data["track_spotify_id"];
       //$image = file_get_contents($data[0]); // string
       //$file = file_save_data($image, 'public://druplicon.png',FILE_EXISTS_REPLACE);
       //$vals['field_thumbnail'] = $file;
