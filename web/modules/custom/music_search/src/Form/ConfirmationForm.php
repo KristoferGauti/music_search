@@ -64,154 +64,27 @@ class ConfirmationForm extends ConfigFormBase
    */
   public function buildForm(array $form, FormStateInterface $form_state){
     $checkbox_values = $this->config("music_search.search_results")->get("checkbox_values");
+    $checkbox_values_discogs = $this->config("music_search.search_results")->get("discogs_checkbox_values");
     $radio_value = $this->config("music_search.search")->get("rad_val");
-    $data = json_decode($this->spotify_service->get_data());
+    $spotify_data = json_decode($this->spotify_service->get_data());
     $discogs_data = $this->discogs_service->get_data();
-    $results_spotify = [];
-    $results_discogs = [];
-    $pure_data_spotify = [];
-    $pure_data_discogs = [];
+    $this->_get_check_box_association_list_spotify($radio_value, $checkbox_values, $spotify_data);
+    $this->_get_checkbox_values_association_list_discogs($discogs_data, $checkbox_values_discogs);
 
-    $associative_array_of_spotify_data = array();
-    $associative_array_of_discogs_data = array();
-
-    if ($radio_value == "artist") {
-      $new_data = $data->artists->items;
-      foreach($checkbox_values as $index) {
-        $temp = [];
-        $pure_mini = [];
-        if (is_string($index)) {
-          $item = $new_data[$index];
-          $name =  $item->name;
-          $id =  $item->id;
-          $associative_array_of_spotify_data["item"] = $new_data[$index];
-          $associative_array_of_spotify_data["name"] = $item->name;
-          $associative_array_of_spotify_data["item"] = $item->id;
-          if (sizeof($item->genres) != 0 or sizeof($item->images) != 0) {
-            $thumbnail_url = $item->images[0]->url;
-            $genre =  $item->genres[0];
-            array_push($temp, "<strong>Artist name: " .$name. "</strong>" , "Spotify ID: " .$id, "Genre: " .$genre, '<img src=' . $thumbnail_url . ' width = "200" >');
-            array_push($pure_mini,$name , $id, $genre, $thumbnail_url);
-            $associative_array_of_spotify_data["thumb"] = $item->images[0]->url;
-            $associative_array_of_spotify_data["genre"] = $item->genres[0];
-          }
-          else {
-            array_push($temp, $name, $id);
-            array_push($pure_mini,$name,$id);
-          }
-          array_push($results_spotify, $temp);
-          array_push($pure_data_spotify, $pure_mini);
-        }
-        else {
-          break;
-        }
-      }
-
-    } elseif ($radio_value == 'album') {
-      foreach ($checkbox_values as $index) {
-        if(is_string($index)){
-          $album_array = [];
-          $pure_mini = [];
-          $album_data = $data->albums->items[$index];
-          $album_image = $album_data->images[0]->url;
-          $album_spotify_id =  $album_data->id;
-          $str_image = '<img class = "stuff" src=' . $album_image . ' width = "200" >';
-          $album_artist =  $album_data->artists[0]->name;
-          $album_name =  $album_data->name;
-          $album_release_date = $album_data->release_date;
-
-          $associative_array_of_spotify_data["album_image"] = $album_data->images[0]->url;
-          $associative_array_of_spotify_data["album_spotify_id"] = $album_data->id;
-          $associative_array_of_spotify_data["album_image"] = $album_image;
-          $associative_array_of_spotify_data["album_artist"] = $album_data->artists[0]->name;
-          $associative_array_of_spotify_data["album_name"] = $album_data->name;
-          $associative_array_of_spotify_data["album_release_date"] = $album_data->release_date;
-
-          array_push($album_array, "<strong>Album name: " .$album_name. "</strong>", "Spotify ID: " .$album_spotify_id, "Artist name: " .$album_artist,  "Album relesed date: " .$album_release_date, $str_image);
-          //We dont need this whereas we have associative arrays!!!! refactor later
-          array_push($pure_mini, $album_image,$album_name,$album_artist,$album_image,$album_spotify_id);
-          array_push($results_spotify, $album_array);
-          array_push($pure_data_spotify, $pure_mini);
-        }
-        else {
-          break;
-        }
-      }
-    } else {
-      foreach($checkbox_values as $index) {
-        $track_array = [];
-        $pure_mini = [];
-        if(is_string($index)){
-          $track_data = $data->tracks->items[$index];
-          $track_performer = $track_data->artists[0]->name;
-          $track_name = $track_data->name;
-          $track_image_url = $track_data->album->images[0]->url;
-          $str_image = '<img class = "stuff" src=' . $track_image_url . ' width = "200" >';
-          $track_duration = (($track_data->duration_ms)/1000);
-
-
-          $associative_array_of_spotify_data["track_performer"] = $track_data->artists[0]->name;;
-          $associative_array_of_spotify_data["track_name"] = $track_data->name;;
-          $associative_array_of_spotify_data["track_image_url"] = $track_data->album->images[0]->url;;
-          $associative_array_of_spotify_data["track_duration"] = (($track_data->duration_ms)/1000);
-          $associative_array_of_spotify_data["track_spotify_id"] = $track_data->id;
-
-          array_push($track_array,  "<strong>Track name: " .$track_name. "</strong>", "Artist name: " . $track_performer, "Track duration: " . $track_duration, $str_image);
-          //We dont need this whereas we have associative arrays!!!! refactor later
-          array_push($pure_mini,$track_name,$track_performer,$track_duration,$track_image_url);
-          array_push($results_spotify, $track_array);
-          array_push($pure_data_spotify, $pure_mini);
-        }
-        else {
-          break;
-        }
-      }
-    }
-
-    $discogs_checkbox_values = $this->config("music_search.search_results")->get("discogs_checkbox_values");
-    foreach($discogs_checkbox_values as $index) {
-      $album_arr = [];
-      $pure_mini = [];
-      if(is_string($index)){
-        $item = $discogs_data[intval($index)];
-        $id =  $item->id;
-        $title =  $item->title ;
-        $thumb = $item->thumb;
-        $thumb_html = '<img class = "stuff" src=' . $thumb . ' width = "200" >';
-
-
-        $associative_array_of_discogs_data["discogs_id"] =  $item->id;
-        $associative_array_of_discogs_data["title"] = $item->title;
-        $associative_array_of_discogs_data["thumbnail"] = $item->thumb;
-
-        array_push($album_arr, "<strong>Title: " .$title. "</strong>", "Discogs ID:" .$id, $thumb_html);
-        //We dont need this whereas we have associative arrays!!!! refactor later
-        array_push($pure_mini, $title, $id, $thumb);
-        array_push($results_discogs, $album_arr);
-        array_push($pure_data_discogs, $pure_mini);
-      }else {
-        break;
-      }
-    }
-
-    $this->config("music_search.search_results")
-      ->set("spotify_pure_associative", $associative_array_of_spotify_data)
-      ->set("discogs_pure_associative", $associative_array_of_discogs_data)
-      ->save();
-
+    $results_spotify = $this->config("music_search.search_results")->get("results_spotify");
+    $results_discogs = $this->config("music_search.search_results")->get("results_discogs");
 
     $form['name'] = array(
       '#type' => 'checkboxes',
       "#title" => "Spotify Data",
-      '#options' => $this->_format_into_a_option_list($results_spotify),
+      '#options' => $results_spotify,
     );
 
     $form['Discogs_name'] = array(
       '#type' => 'checkboxes',
       "#title" => "Discogs Data",
-      '#options' => $this->_format_into_a_option_list($results_discogs),
+      '#options' => $results_discogs,
     );
-
 
     $form["Continue"] = [
       "#type" => "submit",
@@ -225,20 +98,101 @@ class ConfirmationForm extends ConfigFormBase
    */
   public function submitForm(array &$form, FormStateInterface $form_state)
   {
-    //We dont need this whereas we have associative arrays!!!! refactor later
     $checkbox_values_spotify = $form_state->getValue('name');
     $checkbox_values_discogs = $form_state->getValue('Discogs_name');
 
     $radio_value = $this->config("music_search.search")->get("rad_val");
 
-    $spotify_data = $this->config('music_search.search_results')->get("spotify_pure_associative");
-    $discogs_data = $this->config('music_search.search_results')->get("discogs_pure_associative");
+    $results_spotify = $this->config("music_search.search_results")->get("results_spotify");
+    $results_discogs = $this->config("music_search.search_results")->get("results_discogs");
+    $selected_data = $this->_get_data($results_spotify, $results_discogs, $checkbox_values_spotify, $checkbox_values_discogs, $radio_value);
 
-    $this->create_data($radio_value, $spotify_data);
-    //$this->create_data($radio_value, $discogs_data_chosen);
 
-      parent::submitForm($form, $form_state);
+    if ($selected_data) {
+      $this->create_data($radio_value, $selected_data);
+    }
+    else {
+      if ($radio_value == "artist") {
+        //send error message according to the data types in the artist content type
+      }
+      elseif ($radio_value == "album") {
+        //send error message according to the data types in the album content type
+      }
+      else {
+        \Drupal::messenger()->addError("Error. You have to choose track name, track id and track duration, one of each!");
+      }
+    }
+
+    parent::submitForm($form, $form_state);
   }
+
+  private function _get_data($spotify_results, $discogs_results, $spotify_checkbox_values, $discogs_checkbox_values, $radio_value) {
+    $associative_array_of_spotify_data = [];
+    $associative_array_of_discogs_data = [];
+    //for blah insert into associative list with respect to checkboxes
+    if ($radio_value == "artist") {
+      //call validate data function
+      $a=0;
+      return $a;
+    }
+    elseif ($radio_value == "album") {
+      //call validate data function
+      $b=1;
+      return $b;
+    }
+    else {
+      $spotify_chosen_data = $this->_get_chosen_data($spotify_results, $spotify_checkbox_values);
+      $discogs_chosen_data = $this->_get_chosen_data($discogs_results, $discogs_checkbox_values);
+      $selected_data = $this->validate_data(array_merge($spotify_chosen_data, $discogs_chosen_data), [
+        "<strong>Track name",
+        "Track duration",
+        "ID"
+      ],  3);
+      return $selected_data;
+    }
+  }
+
+  private function _get_chosen_data($arr, $checkbox_arr) {
+    $chosen_data_arr = [];
+    foreach($checkbox_arr as $index) {
+      if (is_string($index)) {
+        array_push($chosen_data_arr, $arr[intval($index)]);
+      }
+    }
+    return $chosen_data_arr;
+  }
+
+  public function validate_data($arr, $valid_datatypes_arr, $valid_count) {
+    $valid_counter = 0;
+    $no_dupl_keys_arr = [];
+    $no_dupl_values_arr = [];
+    $duplicate_bool = false;
+    foreach($arr as $item) {
+      $key_value = explode(":", $item);
+      if (in_array($key_value[0], $valid_datatypes_arr)) {
+        if (!in_array($key_value[0], $no_dupl_keys_arr)) {
+          array_push($no_dupl_keys_arr, $key_value[0]);
+          array_push($no_dupl_values_arr, [$key_value[0] => $key_value[1]]);
+          $valid_counter += 1;
+        }
+        else {
+          $duplicate_bool = true;
+        }
+      }
+    }
+    if ($valid_counter == $valid_count and !$duplicate_bool) {
+      $associative_arr_data = array();
+      foreach($no_dupl_values_arr as $real_associative_item) {
+        $associative_arr_data = array_merge($associative_arr_data, $real_associative_item);
+      }
+      $a = 10;
+      return $associative_arr_data;
+    }
+    else {
+      return null;
+    }
+  }
+
   public function create_data($type, $data) {
     $store = \Drupal::entityTypeManager()->getStorage('node');
     $vals['type'] = $type;
@@ -253,50 +207,142 @@ class ConfirmationForm extends ConfigFormBase
 
     }
     else { //this is: track
-      $minute_float = floatval(explode(".", strval($data["track_duration"]))[0]) / 60;
-      $seconds_string = intval(floatval("0." . explode(".", $minute_float)[1]) * 60);
+      $a = strval($data["Track duration"]);
+      $title = str_replace("</strong>", "", $data["<strong>Track name"]);
+      $minute_float = floatval(explode(".", strval($data["Track duration"]))[0]) / 60;
+      $minute_str = strval(floor(floatval(explode(".", strval($data["Track duration"]))[0]) / 60));
+      $seconds_string = strval(intval(floor(floatval("0." . explode(".", $minute_float)[1]) * 60)));
       $vals["type"] = "songs";
-      $vals["title"] = $data["track_name"];
-      $vals['field_spotify_id'] = $data["track_spotify_id"];
-      $vals["field_duration"] = strval(intval($minute_float)) . ":" . $seconds_string;
-      //genre entity reference
-
+      $vals["title"] = $title;
+      $vals['field_spotify_id'] = $data["ID"];
+      $vals["field_duration"] = $minute_str . ":" . $seconds_string;
     }
     $node = $store->create($vals);
     $node->save();
     return $node;
   }
 
+  private function _get_check_box_association_list_spotify($radio_value, $checkbox_values, $data) {
+    $results_spotify = []; //html tag list of spotify data
+    $clean_results_spotify = []; //no html tag list of spotify data
+    $associative_array_of_spotify_data = array();
 
-
-
-  private function _format_into_a_option_list($arr) {
-    $options_list = [];
-    foreach($arr as $result) {
-      //array_push($stuff,"<hr/>");
-      foreach($result as $elem) {
-        array_push($options_list, $elem);
+    if ($radio_value == "artist") {
+      $new_data = $data->artists->items;
+      foreach($checkbox_values as $index) {
+        // Insert into clean_results_spotify array lastly!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        $temp = [];
+        $pure_mini = [];
+        if (is_string($index)) {
+          $item = $new_data[$index];
+          $name =  $item->name;
+          $id =  $item->id;
+          //$associative_array_of_spotify_data["name"] = $item->name;
+          if (sizeof($item->genres) != 0 or sizeof($item->images) != 0) {
+            $thumbnail_url = $item->images[0]->url;
+            $genre =  $item->genres[0];
+            array_push($temp, "<strong>Artist name: " .$name. "</strong>" , "Spotify ID: " .$id, "Genre: " .$genre, '<img src=' . $thumbnail_url . ' width = "200" >');
+            array_push($pure_mini,$name , $id, $genre, $thumbnail_url);
+//            $associative_array_of_spotify_data["thumb"] = $item->images[0]->url;
+//            $associative_array_of_spotify_data["genre"] = $item->genres[0];
+          }
+          else {
+            array_push($temp, $name, $id);
+            array_push($pure_mini,$name,$id);
+          }
+          array_push($results_spotify, $temp);
+          array_push($pure_data_spotify, $pure_mini);
+        }
+        else {
+          break;
+        }
       }
     }
-    return $options_list;
+    elseif ($radio_value == 'album') {
+      foreach ($checkbox_values as $index) {
+        if(is_string($index)){
+          $album_array = [];
+          $album_data = $data->albums->items[$index];
+          $album_image = $album_data->images[0]->url;
+          $album_spotify_id =  $album_data->id;
+          $str_image = '<img class = "stuff" src=' . $album_image . ' width = "200" >';
+          $album_artist =  $album_data->artists[0]->name;
+          $album_name =  $album_data->name;
+          $album_release_date = $album_data->release_date;
+          array_push($clean_results_spotify, $album_name, $album_spotify_id, $album_artist, $album_release_date, $album_image);
+
+//          $associative_array_of_spotify_data["album_image"] = $album_data->images[0]->url;
+//          $associative_array_of_spotify_data["album_spotify_id"] = $album_data->id;
+//          $associative_array_of_spotify_data["album_image"] = $album_image;
+//          $associative_array_of_spotify_data["album_artist"] = $album_data->artists[0]->name;
+//          $associative_array_of_spotify_data["album_name"] = $album_data->name;
+//          $associative_array_of_spotify_data["album_release_date"] = $album_data->release_date;
+
+          array_push($album_array, "<strong>Album name: " .$album_name. "</strong>", "Spotify ID: " .$album_spotify_id, "Artist name: " .$album_artist,  "Album relesed date: " .$album_release_date, $str_image);
+          $results_spotify = array_merge($results_spotify, $album_array);
+        }
+        else {
+          break;
+        }
+      }
+    }
+    else {
+      foreach($checkbox_values as $index) {
+        $track_array = [];
+        if(is_string($index)){
+          $track_data = $data->tracks->items[$index];
+          $track_name = $track_data->name;
+          $spotify_id = $track_data->id;
+          $track_duration = (($track_data->duration_ms)/1000);
+          array_push($clean_results_spotify, $track_name, $spotify_id, $track_duration);
+          array_push($track_array,  "<strong>Track name: " .$track_name. "</strong>", "ID: " . $spotify_id  , "Track duration: " . $track_duration);
+          $results_spotify = array_merge($results_spotify, $track_array);
+        }
+        else {
+          break;
+        }
+      }
+    }
+
+    $this->config("music_search.search_results")
+      ->set("results_spotify", $results_spotify)
+      ->set("clean_results_spotify", $clean_results_spotify)
+      ->save();
   }
 
-  private function _get_selected_data($data, $checkbox_data) {
-    $single_list = [];
-    $all_data = [];
+  private function _get_checkbox_values_association_list_discogs($discogs_data, $discogs_checkbox_values) {
+    //$associative_array_of_discogs_data = array();
+    $radio_value = $this->config("music_search.search")->get("rad_val");
+    $results_discogs = [];
+    $clean_results_discogs = [];
+    foreach($discogs_checkbox_values as $index) {
+      $album_arr = [];
+      if(is_string($index)){
+        $item = $discogs_data[intval($index)];
+        $id =  $item->id;
+        $title =  $item->title ;
+        $thumb = $item->thumb;
+        $thumb_html = '<img class = "stuff" src=' . $thumb . ' width = "200" >';
+        array_push($clean_results_discogs, $title, $id, $thumb);
 
-    foreach($data as $item){
-      foreach($item as $attribute) {
-        array_push($single_list, $attribute);
+//        $associative_array_of_discogs_data["discogs_id"] =  $item->id;
+//        $associative_array_of_discogs_data["title"] = $item->title;
+//        $associative_array_of_discogs_data["thumbnail"] = $item->thumb;
+
+        if ($radio_value == "track") {
+          array_push($album_arr, "<strong>Track name: " .$title. "</strong>", "ID:" .$id);
+        }
+        else {
+          array_push($album_arr, "<strong>Track name: " .$title. "</strong>", "ID:" .$id, $thumb_html);
+        }
+        $results_discogs = array_merge($results_discogs, $album_arr);
+      }else {
+        break;
       }
     }
-
-    foreach ($checkbox_data as $index) {
-      if (is_string($index)) {
-        array_push($all_data, $single_list[intval($index)]);
-      }
-
-    }
-    return $all_data;
+    $this->config("music_search.search_results")
+      ->set("results_discogs", $results_discogs)
+      ->set("clean_results_discogs", $clean_results_discogs)
+      ->save();
   }
 }
