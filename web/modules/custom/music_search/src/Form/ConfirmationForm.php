@@ -2,10 +2,14 @@
 namespace Drupal\music_search\Form;
 
 use DOMDocument;
+use DOMXPath;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
+use Drupal\file\Entity\File;
+use Drupal\media\Entity\Media;
 use Drupal\music_search\DiscogsSearchService;
 use Drupal\music_search\SpotifySearchService;
 use http\Env\Response;
@@ -110,26 +114,25 @@ class ConfirmationForm extends ConfigFormBase
 
     if ($selected_data) {
       $this->create_data($radio_value, $selected_data);
+      parent::submitForm($form, $form_state);
     }
     else {
       if ($radio_value == "artist") {
         //send error message according to the data types in the artist content type
       }
       elseif ($radio_value == "album") {
-        //send error message according to the data types in the album content type
+        \Drupal::messenger()->addError("Error. You have to choose album name, artist name, album released date and a thumbnail, one of each!");
       }
       else {
         \Drupal::messenger()->addError("Error. You have to choose track name, track id and track duration, one of each!");
       }
     }
 
-    parent::submitForm($form, $form_state);
   }
 
   private function _get_data($spotify_results, $discogs_results, $spotify_checkbox_values, $discogs_checkbox_values, $radio_value) {
-    $associative_array_of_spotify_data = [];
-    $associative_array_of_discogs_data = [];
-    //for blah insert into associative list with respect to checkboxes
+    $spotify_chosen_data = $this->_get_chosen_data($spotify_results, $spotify_checkbox_values);
+    $discogs_chosen_data = $this->_get_chosen_data($discogs_results, $discogs_checkbox_values);
     if ($radio_value == "artist") {
       //call validate data function
       $a=0;
@@ -137,12 +140,15 @@ class ConfirmationForm extends ConfigFormBase
     }
     elseif ($radio_value == "album") {
       //call validate data function
-      $b=1;
-      return $b;
+      $selected_data = $this->validate_data(array_merge($spotify_chosen_data, $discogs_chosen_data), [
+        "Artist name",
+        "<strong>Album name",
+        "Album released date",
+        "<img "
+      ], 4);
+      return $selected_data;
     }
     else {
-      $spotify_chosen_data = $this->_get_chosen_data($spotify_results, $spotify_checkbox_values);
-      $discogs_chosen_data = $this->_get_chosen_data($discogs_results, $discogs_checkbox_values);
       $selected_data = $this->validate_data(array_merge($spotify_chosen_data, $discogs_chosen_data), [
         "<strong>Track name",
         "Track duration",
@@ -168,11 +174,21 @@ class ConfirmationForm extends ConfigFormBase
     $no_dupl_values_arr = [];
     $duplicate_bool = false;
     foreach($arr as $item) {
-      $key_value = explode(":", $item);
+      if (strpos($item, "<img") !== false) {
+        $key_value = explode("src=", $item);
+      }
+      else {
+        $key_value = explode(":", $item);
+      }
       if (in_array($key_value[0], $valid_datatypes_arr)) {
         if (!in_array($key_value[0], $no_dupl_keys_arr)) {
           array_push($no_dupl_keys_arr, $key_value[0]);
-          array_push($no_dupl_values_arr, [$key_value[0] => $key_value[1]]);
+          if (strpos($item, "<img") !== false) {
+            array_push($no_dupl_values_arr, ["img_tag" => $item]);
+          }
+          else {
+            array_push($no_dupl_values_arr, [$key_value[0] => $key_value[1]]);
+          }
           $valid_counter += 1;
         }
         else {
@@ -193,6 +209,25 @@ class ConfirmationForm extends ConfigFormBase
     }
   }
 
+  /**
+   * @throws \Drupal\Core\Entity\EntityStorageException
+   */
+  private function _create_media($url) {
+    $file_data = file_get_contents($url);
+    //'public://test.png'
+    $link_array = explode("/", $url);
+    $file_hash = end($link_array);
+    $filename = 'public://' . strval($file_hash) . '.png';
+    $file = file_save_data($file_data, $filename, FileSystemInterface::EXISTS_REPLACE);
+    $media = Media::create([
+      'bundle'           => 'image',
+      'uid'              => \Drupal::currentUser()->id(),
+      'field_media_image' => $file->id(),
+    ]);
+    $media->save();
+    return $media->id();
+  }
+
   public function create_data($type, $data) {
     $store = \Drupal::entityTypeManager()->getStorage('node');
     $vals['type'] = $type;
@@ -200,14 +235,20 @@ class ConfirmationForm extends ConfigFormBase
     if ($type == 'artist') {
       // Set values for new artist
     } elseif ($type == 'album') {
-
-      $vals['title'] = $data["album_name"];
-      $vals['field_published_date'] = $data["album_release_date"];
-      //$vals['id'] = $data['album_spotify_id'];
-
+      $doc = new DOMDocument();
+      $doc->loadHTML($data["img_tag"]);
+      $xpath = new DOMXPath($doc);
+      $url = $xpath->evaluate("string(//img/@src)");
+      $file_id = $this->_create_media($url);
+      $title = str_replace("</strong>", "", $data["<strong>Album name"]);
+      $vals['title'] = $title;
+      $vals['field_published_date'] = $data["Album released date"];
+      $vals["field_thumbnail"] = [
+        ['target_id' => $file_id]
+      ];
+      $vals["field_published_date"] = trim($data["Album released date"], " ");
     }
     else { //this is: track
-      $a = strval($data["Track duration"]);
       $title = str_replace("</strong>", "", $data["<strong>Track name"]);
       $minute_float = floatval(explode(".", strval($data["Track duration"]))[0]) / 60;
       $minute_str = strval(floor(floatval(explode(".", strval($data["Track duration"]))[0]) / 60));
@@ -241,7 +282,7 @@ class ConfirmationForm extends ConfigFormBase
           if (sizeof($item->genres) != 0 or sizeof($item->images) != 0) {
             $thumbnail_url = $item->images[0]->url;
             $genre =  $item->genres[0];
-            array_push($temp, "<strong>Artist name: " .$name. "</strong>" , "Spotify ID: " .$id, "Genre: " .$genre, '<img src=' . $thumbnail_url . ' width = "200" >');
+            array_push($temp, "<strong>Artist name: " .$name. "</strong>" , "Spotify ID: " .$id, "Genre: " .$genre, "<img src=" . $thumbnail_url . " width = '200' >");
             array_push($pure_mini,$name , $id, $genre, $thumbnail_url);
 //            $associative_array_of_spotify_data["thumb"] = $item->images[0]->url;
 //            $associative_array_of_spotify_data["genre"] = $item->genres[0];
@@ -265,11 +306,11 @@ class ConfirmationForm extends ConfigFormBase
           $album_data = $data->albums->items[$index];
           $album_image = $album_data->images[0]->url;
           $album_spotify_id =  $album_data->id;
-          $str_image = '<img class = "stuff" src=' . $album_image . ' width = "200" >';
+          $str_image = "<img src=" . $album_image . " width = '200' >";
           $album_artist =  $album_data->artists[0]->name;
           $album_name =  $album_data->name;
           $album_release_date = $album_data->release_date;
-          array_push($clean_results_spotify, $album_name, $album_spotify_id, $album_artist, $album_release_date, $album_image);
+          array_push($clean_results_spotify, $album_name, $album_artist, $album_release_date, $album_image);
 
 //          $associative_array_of_spotify_data["album_image"] = $album_data->images[0]->url;
 //          $associative_array_of_spotify_data["album_spotify_id"] = $album_data->id;
@@ -278,7 +319,8 @@ class ConfirmationForm extends ConfigFormBase
 //          $associative_array_of_spotify_data["album_name"] = $album_data->name;
 //          $associative_array_of_spotify_data["album_release_date"] = $album_data->release_date;
 
-          array_push($album_array, "<strong>Album name: " .$album_name. "</strong>", "Spotify ID: " .$album_spotify_id, "Artist name: " .$album_artist,  "Album relesed date: " .$album_release_date, $str_image);
+          array_push($clean_results_spotify, $album_name,$album_spotify_id, $album_artist, $album_release_date, $album_image);
+          array_push($album_array, "<strong>Album name: " .$album_name. "</strong>", "Artist name: " .$album_artist,  "Album released date: " .$album_release_date, $str_image);
           $results_spotify = array_merge($results_spotify, $album_array);
         }
         else {
@@ -322,7 +364,7 @@ class ConfirmationForm extends ConfigFormBase
         $id =  $item->id;
         $title =  $item->title ;
         $thumb = $item->thumb;
-        $thumb_html = '<img class = "stuff" src=' . $thumb . ' width = "200" >';
+        $thumb_html = "<img src=" . $thumb . " width = '200' >";
         array_push($clean_results_discogs, $title, $id, $thumb);
 
 //        $associative_array_of_discogs_data["discogs_id"] =  $item->id;
@@ -331,6 +373,9 @@ class ConfirmationForm extends ConfigFormBase
 
         if ($radio_value == "track") {
           array_push($album_arr, "<strong>Track name: " .$title. "</strong>", "ID:" .$id);
+        }
+        elseif ($radio_value == "album") {
+          array_push($album_arr, "<strong>Album name: " .$title. "</strong>", $thumb_html);
         }
         else {
           array_push($album_arr, "<strong>Track name: " .$title. "</strong>", "ID:" .$id, $thumb_html);
